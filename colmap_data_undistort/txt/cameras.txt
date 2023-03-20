@@ -1,0 +1,4 @@
+# Camera list with one line of data per camera:
+#   CAMERA_ID, MODEL, WIDTH, HEIGHT, PARAMS[]
+# Number of cameras: 1
+1 OPENCV 3840 2160 1744.12 1745.13 1920 1080 -0.0691379 0.0283642 0.00104492 0.000522355
