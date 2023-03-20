@@ -28,5 +28,14 @@ def main():
     --output_path colmap_data/sparse"
     os.system(cmd)
 
+    # Save output as txt file
+    cmd = "mkdir colmap_data/txt"
+    os.system(cmd)
+    cmd = "colmap model_converter \
+    --input_path colmap_data/sparse/0 \
+    --output_path colmap_data/txt \
+    --output_type TXT"
+    os.system(cmd)
+
 if __name__ == "__main__":
     main()
