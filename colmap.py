@@ -36,7 +36,7 @@ def save_output_as_txt(input_path, output_path, output_type):
 def main(args):
     # Initial or undistorted images
     image_path = "preprocessed/sampled_scene" if args.initial else "preprocessed/undistorted_sampled_scene"
-    data_folder = "colmap_data" if args.initial else "colmap_data_undistort"
+    data_folder = "colmap/data" if args.initial else "colmap/data_undistort"
 
     os.makedirs(data_folder, exist_ok=True)
 
