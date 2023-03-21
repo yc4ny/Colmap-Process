@@ -33,6 +33,14 @@ def save_output_as_txt(input_path, output_path, output_type):
             --output_type {output_type}"
     os.system(cmd)
 
+def model_converter_to_ply(input_path, output_path, output_filename="points3D_undistort.ply"):
+    output_file_path = os.path.join(output_path, output_filename)
+    cmd = f"colmap model_converter \
+            --input_path {input_path} \
+            --output_path {output_file_path} \
+            --output_type PLY"
+    os.system(cmd)
+
 def main(args):
     # Initial or undistorted images
     image_path = "preprocessed/sampled_scene" if args.initial else "preprocessed/undistorted_sampled_scene"
