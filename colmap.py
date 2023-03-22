@@ -43,7 +43,7 @@ def model_converter_to_ply(input_path, output_path, output_filename="points3D_un
 
 def main(args):
     # Initial or undistorted images
-    image_path = "preprocessed/sampled_scene" if args.initial else "preprocessed/undistorted_sampled_scene"
+    image_path = "preprocessed/scene" if args.initial else "preprocessed/undistorted_scene"
     data_folder = "colmap/data" if args.initial else "colmap/data_undistort"
 
     os.makedirs(data_folder, exist_ok=True)

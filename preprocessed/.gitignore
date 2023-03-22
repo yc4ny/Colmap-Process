@@ -1,9 +1,1 @@
-left
-right
-sampled_scene
-undistorted_left
-undistorted_right
-undistorted_sampled_scene
-reproject_sampled_scene
-reproject_undistort_scene
-reproject_concat
+*

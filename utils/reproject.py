@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 # Argument parser
 parser = argparse.ArgumentParser(description='Visualzing reprojection')
-parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data/txt/cameras.txt', required=False)
-parser.add_argument('--points', help='points3D.txt file', default='colmap/data/txt/points3D.txt', required=False)
-parser.add_argument('--images', help='images.txt file', default='colmap/data/txt/images.txt', required=False)
+parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data_undistort2/txt/cameras.txt', required=False)
+parser.add_argument('--points', help='points3D.txt file', default='colmap/data_undistort2/txt/points3D.txt', required=False)
+parser.add_argument('--images', help='images.txt file', default='colmap/data_undistort2/txt/images.txt', required=False)
 args = parser.parse_args()
 
 # Read camera intrinsic parameters from the file
@@ -151,7 +151,7 @@ def main():
     K = read_camera(args.cameras)
     points3D = read_points(args.points)
     Rt, keypoints2d = read_images(args.images)
-    reproject(K,Rt,points3D,keypoints2d, "preprocessed/undistorted_sampled_scene", "preprocessed/reproject_undistort_scene")
+    reproject(K,Rt,points3D,keypoints2d, "preprocessed/undistorted_undistorted_sampled_scene", "preprocessed/reproject_undistorted_undistorted_sampled_scene")
 
 
 if __name__ == "__main__":
