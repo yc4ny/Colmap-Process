@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 # Argument parser
 parser = argparse.ArgumentParser(description='Visualzing reprojection')
-parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data_undistort2/txt/cameras.txt', required=False)
-parser.add_argument('--points', help='points3D.txt file', default='colmap/data_undistort2/txt/points3D.txt', required=False)
-parser.add_argument('--images', help='images.txt file', default='colmap/data_undistort2/txt/images.txt', required=False)
+parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data_undistort/txt/cameras.txt', required=False)
+parser.add_argument('--points', help='points3D.txt file', default='colmap/data_undistort/txt/points3D.txt', required=False)
+parser.add_argument('--images', help='images.txt file', default='colmap/data_undistort/txt/images.txt', required=False)
 args = parser.parse_args()
 
 # Read camera intrinsic parameters from the file
@@ -33,18 +33,20 @@ def read_camera(file_path):
     ])
     return K
 
-# Read 3D points from the file
+# Read 3D points,color information from file
 def read_points(file_path):
     with open(file_path, 'r') as f:
         lines = f.readlines()[3:]  # Skip the header lines
 
     points = []
+    colors = []
     for line in lines:
         if line.strip():
-            id, x, y, z, _, _, _, _ = line.split(None, 7)
+            id, x, y, z, r, g, b, _ = line.split(None, 7)
             points.append([float(x), float(y), float(z)])
+            colors.append([int(r), int(g), int(b)])
 
-    return np.array(points)
+    return np.array(points), np.array(colors)
 
 # Read image extrinsic parameters and 2D keypoints from the file
 def read_images(filepath):
@@ -91,7 +93,7 @@ def quaternion_to_rotation_matrix(qw, qx, qy, qz):
     return R
 
 # Reproject 3D points on images and visualize the reprojection error
-def reproject(K, Rt, points3D,points2D, input_folder, output_folder):
+def reproject(K, Rt, points3D, colors, points2D, input_folder, output_folder):
     # Get the sorted image files from the input folder
     image_files = sorted([f for f in os.listdir(input_folder) if f.endswith('.jpg')])
    
@@ -121,7 +123,8 @@ def reproject(K, Rt, points3D,points2D, input_folder, output_folder):
             v = projected_point[1] / projected_point[2]
 
             if 0 <= u < img.shape[1] and 0 <= v < img.shape[0]:
-                cv2.circle(img, (int(u), int(v)), 2, (0, 255, 0), -1)
+                color = tuple(reversed(colors[i]))  # Convert RGB to BGR for OpenCV
+                cv2.circle(img, (int(u), int(v)), 3, tuple((int(color[0]), int(color[1]), int(color[2]))), -1)
                 if i < len(points2D[idx]):
                     error = np.linalg.norm(points2D[idx][i] - np.array([u, v]))
                     frame_error += error
@@ -140,8 +143,8 @@ def reproject(K, Rt, points3D,points2D, input_folder, output_folder):
         text_pos1 = (int(0.05 * width), int(0.08 * height))
         text_pos2 = (int(0.05 * width), int(0.16 * height))
 
-        cv2.putText(img, f'Frame reprojection error: {frame_error/frame_points:.2f}', text_pos1, cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 5, cv2.LINE_AA)
-        cv2.putText(img, f'Avg. error so far: {avg_error_so_far:.2f}', text_pos2, cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 5, cv2.LINE_AA)
+        # cv2.putText(img, f'Frame reprojection error: {frame_error/frame_points:.2f}', text_pos1, cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 5, cv2.LINE_AA)
+        # cv2.putText(img, f'Avg. error so far: {avg_error_so_far:.2f}', text_pos2, cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), 5, cv2.LINE_AA)
         output_image_path = os.path.join(output_folder, image_file)
         cv2.imwrite(output_image_path, img)
     
@@ -149,9 +152,9 @@ def reproject(K, Rt, points3D,points2D, input_folder, output_folder):
 
 def main():
     K = read_camera(args.cameras)
-    points3D = read_points(args.points)
+    points3D, color = read_points(args.points)
     Rt, keypoints2d = read_images(args.images)
-    reproject(K,Rt,points3D,keypoints2d, "preprocessed/undistorted_undistorted_sampled_scene", "preprocessed/reproject_undistorted_undistorted_sampled_scene")
+    reproject(K,Rt,points3D, color, keypoints2d, "preprocessed/undistorted_scene", "preprocessed/reproject_undistorted_scene")
 
 
 if __name__ == "__main__":
