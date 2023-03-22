@@ -124,7 +124,8 @@ def reproject(K, Rt, points3D, colors, points2D, input_folder, output_folder):
 
             if 0 <= u < img.shape[1] and 0 <= v < img.shape[0]:
                 color = tuple(reversed(colors[i]))  # Convert RGB to BGR for OpenCV
-                cv2.circle(img, (int(u), int(v)), 3, tuple((int(color[0]), int(color[1]), int(color[2]))), -1)
+                # cv2.circle(img, (int(u), int(v)), 3, tuple((int(color[0]), int(color[1]), int(color[2]))), -1)
+                cv2.circle(img, (int(u), int(v)), 2,(0,255,0), -1)
                 if i < len(points2D[idx]):
                     error = np.linalg.norm(points2D[idx][i] - np.array([u, v]))
                     frame_error += error
