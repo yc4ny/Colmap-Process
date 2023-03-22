@@ -46,7 +46,7 @@ def undistort_images(input_folder, output_folder, camera_params):
                 cv2.imwrite(output_img_path, undistorted_img)
 
 def main():
-    camera_params_file = 'colmap/data_undistort2/txt/cameras.txt'
+    camera_params_file = 'colmap/data_undistort/txt/cameras.txt'
     base_input_folder = 'preprocessed'
     subfolders = ['undistorted_sampled_scene']
 
