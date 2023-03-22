@@ -48,7 +48,7 @@ def undistort_images(input_folder, output_folder, camera_params):
 def main():
     camera_params_file = 'colmap/data_undistort/txt/cameras.txt'
     base_input_folder = 'preprocessed'
-    subfolders = ['undistorted_scene']
+    subfolders = ['left', 'right', 'undistorted_scene']
 
     # Read camera parameters from the file
     camera_params = read_camera_params(camera_params_file)

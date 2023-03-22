@@ -7,9 +7,9 @@ from tqdm import tqdm
 
 # Argument parser
 parser = argparse.ArgumentParser(description='Visualzing reprojection')
-parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data_undistort/txt/cameras.txt', required=False)
+parser.add_argument('--cameras', help='cameras.txt file', default='colmap/data_undistort/sparse/left/cameras.txt', required=False)
 parser.add_argument('--points', help='points3D.txt file', default='colmap/data_undistort/txt/points3D.txt', required=False)
-parser.add_argument('--images', help='images.txt file', default='colmap/data_undistort/txt/images.txt', required=False)
+parser.add_argument('--images', help='images.txt file', default='colmap/data_undistort/sparse/left/images.txt', required=False)
 args = parser.parse_args()
 
 # Read camera intrinsic parameters from the file
@@ -155,7 +155,7 @@ def main():
     K = read_camera(args.cameras)
     points3D, color = read_points(args.points)
     Rt, keypoints2d = read_images(args.images)
-    reproject(K,Rt,points3D, color, keypoints2d, "preprocessed/undistorted_scene", "preprocessed/reproject_undistorted_scene")
+    reproject(K,Rt,points3D, color, keypoints2d, "preprocessed/undistorted_left", "preprocessed/reproject_left")
 
 
 if __name__ == "__main__":
