@@ -3,3 +3,6 @@ meeting_video
 colmap_data
 preprocessed
 temp
+triangulation
+temp_img
+check_existance.py
