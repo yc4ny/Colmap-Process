@@ -61,11 +61,12 @@ if __name__ == '__main__':
 
     # Read point cloud from file
     pcd = o3d.io.read_point_cloud(args.input)
-    extrinsic, _ = read_images("colmap/data_undistort/sparse/left/images.txt")
+    # extrinsic, _ = read_images("colmap/data_undistort/sparse/left/images.txt")
 
 
-    # Create camera coordinate frames from extrinsics
-    camera_frames = [create_camera_coordinate_frame(e, size=0.3) for e in extrinsic]
+    # # Create camera coordinate frames from extrinsics
+    # camera_frames = [create_camera_coordinate_frame(e, size=0.3) for e in extrinsic]
 
     # Visualize point cloud and camera frames
-    o3d.visualization.draw_geometries([pcd, *camera_frames])
+    # o3d.visualization.draw_geometries([pcd, *camera_frames])
+    o3d.visualization.draw_geometries([pcd])

@@ -35,7 +35,7 @@ def extract_frames(video, output, path, is_scene=False):
 
             if not ret:
                 break
-            output_path = os.path.join(save_dir, f"{frame_num:05d}.jpg")
+            output_path = os.path.join(save_dir, f"{basename}_{frame_num:05d}.jpg")
             cv2.imwrite(output_path, frame, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])
             frame_num += 1
             pbar.update(1)

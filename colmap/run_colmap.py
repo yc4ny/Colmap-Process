@@ -33,7 +33,7 @@ def save_output_as_txt(input_path, output_path, output_type):
             --output_type {output_type}"
     os.system(cmd)
 
-def save_output_as_ply(input_path, output_path, output_filename="points.ply"):
+def save_output_as_ply(input_path, output_path, output_filename="points3D.ply"):
     output_file_path = os.path.join(output_path, output_filename)
     cmd = f"colmap model_converter \
             --input_path {input_path} \
@@ -61,24 +61,23 @@ def main(args):
     # Feature Matching
     feature_matching(database_path=f"{data_folder}/database.db")
 
-    # Sparse Reconstruction
-    sparse_reconstruction(
-        database_path=f"{data_folder}/database.db",
-        image_path=image_path,
-        output_path=f"{data_folder}/sparse"
-    )
+    # # Sparse Reconstruction
+    # sparse_reconstruction(
+    #     database_path=f"{data_folder}/database.db",
+    #     image_path=image_path,
+    #     output_path=f"{data_folder}/sparse"
+    # )
 
     # Save output as txt file
     save_output_as_txt(
         input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/txt",
+        output_path=f"{data_folder}/sparse/0/converter",
         output_type="TXT"
     )
 
     save_output_as_ply(
         input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/txt",
-        output_type="PLY"
+        output_path=f"{data_folder}/sparse/0/converter",
     )
 
 if __name__ == "__main__":
