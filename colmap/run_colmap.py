@@ -61,12 +61,12 @@ def main(args):
     # Feature Matching
     feature_matching(database_path=f"{data_folder}/database.db")
 
-    # # Sparse Reconstruction
-    # sparse_reconstruction(
-    #     database_path=f"{data_folder}/database.db",
-    #     image_path=image_path,
-    #     output_path=f"{data_folder}/sparse"
-    # )
+    # Sparse Reconstruction
+    sparse_reconstruction(
+        database_path=f"{data_folder}/database.db",
+        image_path=image_path,
+        output_path=f"{data_folder}/sparse"
+    )
 
     # Save output as txt file
     save_output_as_txt(
