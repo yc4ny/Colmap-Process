@@ -2,7 +2,7 @@ import os
 import argparse
 
 def create_database(database_path):
-    cmd = f"colmap database_create --database_path {database_path}"
+    cmd = f"colmap database_creator --database_path {database_path}"
     os.system(cmd)
 
 def feature_extraction(database_path, image_path, single_camera, camera_model):
@@ -33,7 +33,7 @@ def save_output_as_txt(input_path, output_path, output_type):
             --output_type {output_type}"
     os.system(cmd)
 
-def model_converter_to_ply(input_path, output_path, output_filename="points3D_undistort.ply"):
+def save_output_as_ply(input_path, output_path, output_filename="points.ply"):
     output_file_path = os.path.join(output_path, output_filename)
     cmd = f"colmap model_converter \
             --input_path {input_path} \
@@ -42,9 +42,8 @@ def model_converter_to_ply(input_path, output_path, output_filename="points3D_un
     os.system(cmd)
 
 def main(args):
-    # Initial or undistorted images
-    image_path = "preprocessed/scene" if args.initial else "preprocessed/undistorted_scene"
-    data_folder = "colmap/data" if args.initial else "colmap/data_undistort"
+    data_folder = args.colmap_data
+    image_path = args.image_path
 
     os.makedirs(data_folder, exist_ok=True)
 
@@ -76,13 +75,16 @@ def main(args):
         output_type="TXT"
     )
 
+    save_output_as_ply(
+        input_path=f"{data_folder}/sparse/0",
+        output_path=f"{data_folder}/txt",
+        output_type="PLY"
+    )
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run COLMAP with initial or undistorted images.")
-    parser.add_argument("--initial", action="store_true", help="Use initial images (default)")
-    parser.add_argument("--undistorted", action="store_true", help="Use undistorted images")
+    parser.add_argument("--image_path", action="store_true", help="Image paths", default = "preprocessed/scene")
+    parser.add_argument("--colmap_data",action="store_true", help="Path to colmap data", default = "colmap_data")
     args = parser.parse_args()
-
-    if not (args.initial or args.undistorted):
-        args.initial = True
 
     main(args)
