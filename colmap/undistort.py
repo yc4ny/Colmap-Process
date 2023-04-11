@@ -4,6 +4,47 @@ import cv2
 import numpy as np 
 from tqdm import tqdm
 
+import cmath
+
+# distorting point using first distortion parameter, in any direction
+class Point2f:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+def distort_point_r1(pt, k1):
+    if k1 == 0:
+        return pt
+
+    if pt.y == 0:
+        pt.y = 1e-5
+
+    t2 = pt.y * pt.y
+    t3 = t2 * t2 * t2
+    t4 = pt.x * pt.x
+    t7 = k1 * (t2 + t4)
+
+    if k1 > 0:
+        t8 = 1.0 / t7
+        t10 = t3 / (t7 * t7)
+        t14 = cmath.sqrt(t10 * (0.25 + t8 / 27.0))
+        t15 = t2 * t8 * pt.y * 0.5
+        t17 = pow(t14 + t15, 1.0 / 3.0)
+        t18 = t17 - t2 * t8 / (t17 * 3.0)
+        return Point2f(t18 * pt.x / pt.y, t18)
+    else:
+        t9 = t3 / (t7 * t7 * 4.0)
+        t11 = t3 / (t7 * t7 * t7 * 27.0)
+        t12 = t9 + t11
+        t13 = cmath.sqrt(t12)
+        t14 = t2 / t7
+        t15 = t14 * pt.y * 0.5
+        t16 = t13 + t15
+        t17 = pow(t16, 1.0 / 3.0)
+        t18 = (t17 + t14 / (t17 * 3.0)) * cmath.sqrt(3.0) * 1j
+        t19 = -0.5 * (t17 + t18) + t14 / (t17 * 6.0)
+        return Point2f(t19.real * pt.x / pt.y, t19.real)
+
 # Read camera parameters from the given file
 def read_camera_params(filename):
     with open(filename, 'r') as file:
