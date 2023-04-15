@@ -71,13 +71,13 @@ def main(args):
     # Save output as txt file
     save_output_as_txt(
         input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/sparse/0/converter",
+        output_path=f"{data_folder}/sparse/0/",
         output_type="TXT"
     )
 
     save_output_as_ply(
         input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/sparse/0/converter",
+        output_path=f"{data_folder}/sparse/0/",
     )
 
 if __name__ == "__main__":

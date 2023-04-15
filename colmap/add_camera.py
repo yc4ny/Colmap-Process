@@ -7,14 +7,14 @@ def run_command(command):
 
 def main():
     # Set the paths
-    image_path = "temp_img"
+    image_path = "preprocessed/left"
     existing_reconstruction_path = "colmap_data"
     database_path = os.path.join(existing_reconstruction_path, "database.db")
-    input_path = os.path.join(existing_reconstruction_path, "sparse/left/")
-    output_path = os.path.join(existing_reconstruction_path, "sparse/left_left/")
+    input_path = os.path.join(existing_reconstruction_path)
+    output_path = os.path.join(existing_reconstruction_path, "left")
     
     # Feature extraction
-    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model OPENCV"
+    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model OPENCV --ImageReader.camera_params 1784.17,1793.92,1920,1080,-0.193131,0.0274835,-0.00083936,0.000115199"
     run_command(feature_extractor_cmd)
     
     # Feature matching
@@ -22,7 +22,7 @@ def main():
     run_command(exhaustive_matcher_cmd)
     
     # Register new images and estimate camera extrinsics
-    mapper_cmd = f"colmap mapper --database_path {database_path} --image_path {image_path} --input_path {input_path} --output_path {output_path}"
+    mapper_cmd = f"colmap image_registrator --database_path {database_path} --input_path {input_path} --output_path {output_path}"
     run_command(mapper_cmd)
 
 if __name__ == "__main__":
