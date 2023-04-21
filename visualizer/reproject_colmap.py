@@ -55,7 +55,7 @@ def undistort_points(points, k1, k2, p1, p2, fx, fy, cx, cy):
     return np.array(undistorted_points)
 
 def reproject_3d_points(images_folder, images_data, points3D, camera_params):
-    fx, fy, cx, cy, k1, k2, p1, p2 = 1823.49,1804.81,1920,1080,-0.225871,0.042472,-0.00973345,0.00081882
+    fx, fy, cx, cy, k1, k2, p1, p2 = camera_params
     intrinsics = np.array([
         [fx, 0, cx],
         [0, fy, cy],
@@ -64,8 +64,8 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params):
 
     for img_data in tqdm(images_data, desc="Processing frames"):
         img = cv2.imread(os.path.join(images_folder, img_data['name']))
-        # if img_data['name'][0] != 'l':
-        #     continue
+        if img_data['camera_id'] != 2:
+            continue
         rot_matrix = quaternion_to_rotation_matrix(img_data['quaternion'])
         t = np.array(img_data['translation']).reshape(3, 1)
         # print(rot_matrix)
@@ -85,7 +85,7 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params):
             if 0 <= x_proj < img.shape[1] and 0 <= y_proj < img.shape[0]:
                 cv2.circle(img, (x_proj, y_proj), 2, (0, 0, 255), -1)
 
-        cv2.imwrite(os.path.join( "preprocessed/reproject_scene/", f"{img_data['name']}"), img)
+        cv2.imwrite(os.path.join( "preprocessed/reproject_left/", f"{img_data['name']}"), img)
 
 def main(images_folder, cameras_txt, images_txt, points3D_txt):
     camera_params = read_cameras_txt(cameras_txt)
@@ -95,9 +95,9 @@ def main(images_folder, cameras_txt, images_txt, points3D_txt):
     reproject_3d_points(images_folder, images_data, points3D, camera_params)
 
 if __name__ == "__main__":
-    images_folder = "preprocessed/scene"  # Change this to the folder containing the images
-    cameras_txt = "colmap_data/cameras.txt"  # Change this to the path of your cameras.txt file
-    images_txt = "colmap_data/images.txt"  # Change this to the path of your images.txt file
-    points3D_txt = "colmap_data/points3D.txt"  # Change this to the path of your points3D.txt file
+    images_folder = "preprocessed/left"  # Change this to the folder containing the images
+    cameras_txt = "colmap_data/left/cameras.txt"  # Change this to the path of your cameras.txt file
+    images_txt = "colmap_data/left/images.txt"  # Change this to the path of your images.txt file
+    points3D_txt = "colmap_data/left/points3D.txt"  # Change this to the path of your points3D.txt file
 
     main(images_folder, cameras_txt, images_txt, points3D_txt)
