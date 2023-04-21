@@ -1,72 +1,40 @@
 import open3d as o3d
-import argparse
-import numpy as np 
+import json
 
-# Convert quaternion to rotation matrix
-def quaternion_to_rotation_matrix(qw, qx, qy, qz):
-    R = np.zeros((3, 3))
-    R[0, 0] = 1 - 2 * qy ** 2 - 2 * qz ** 2
-    R[0, 1] = 2 * qx * qy - 2 * qz * qw
-    R[0, 2] = 2 * qx * qz + 2 * qy * qw
-    R[1, 0] = 2 * qx * qy + 2 * qz * qw
-    R[1, 1] = 1 - 2 * qx ** 2 - 2 * qz ** 2
-    R[1, 2] = 2 * qy * qz - 2 * qx * qw
-    R[2, 0] = 2 * qx * qz - 2 * qy * qw
-    R[2, 1] = 2 * qy * qz + 2 * qx * qw
-    R[2, 2] = 1 - 2 * qx ** 2 - 2 * qy ** 2
+# Load the scene point cloud
+scene_ply_path = "colmap_data/points.ply"
+pcd = o3d.io.read_point_cloud(scene_ply_path)
 
-    return R
+# Load the 3D joints JSON data
+json_file = "output_3d_joints.json"
+with open(json_file, 'r') as f:
+    joints = json.load(f)
 
-# Read image extrinsic parameters and 2D keypoints from the file
-def read_images(filepath):
-    with open(filepath, 'r') as f:
-        lines = f.readlines()
+# Function to create geometries for hand joints
+def create_hand_geometry(hand_data, color):
+    points = []
+    lines = []
+    
+    for i, finger in enumerate(hand_data):
+        for j, joint in enumerate(finger):
+            points.append(joint)
+            if j > 0:
+                lines.append([len(points) - 2, len(points) - 1])
+                
+    point_cloud = o3d.geometry.PointCloud()
+    point_cloud.points = o3d.utility.Vector3dVector(points)
+    point_cloud.colors = o3d.utility.Vector3dVector([color] * len(points))
+    
+    line_set = o3d.geometry.LineSet()
+    line_set.points = o3d.utility.Vector3dVector(points)
+    line_set.lines = o3d.utility.Vector2iVector(lines)
+    line_set.colors = o3d.utility.Vector3dVector([color] * len(lines))
+    
+    return point_cloud, line_set
 
-    extrinsic_parameters = {}
-    keypoints = {}
-    for idx, line in enumerate(lines):
-        if line.startswith('#') or line.strip() == '':
-            continue
-        if idx % 2 == 0:
-            line_parts = line.strip().split()
-            image_id, qw, qx, qy, qz, tx, ty, tz, camera_id, name = line_parts
-            rotation = quaternion_to_rotation_matrix(float(qw), float(qx), float(qy), float(qz))
-            translation = np.array([float(tx), float(ty), float(tz)]).reshape(3, 1)
-            extrinsic = np.hstack((rotation, translation))
-            extrinsic_parameters[name] = extrinsic
-        else:
-            coords = line.strip().split()
-            coords = [float(x) for x in coords]
-            coords = np.array(coords).reshape(-1, 3)[:, :2]
-            keypoints[name] = coords
+# Create geometries for left and right hands
+left_points, left_lines = create_hand_geometry(joints["left"], [1, 0, 0])
+right_points, right_lines = create_hand_geometry(joints["right"], [0, 1, 0])
 
-    sorted_names = sorted(extrinsic_parameters.keys())
-    extrinsics_array = np.stack([extrinsic_parameters[name] for name in sorted_names], axis=0)
-    keypoints_array = [keypoints[name] for name in sorted_names]
-
-    return extrinsics_array, keypoints_array
-
-def create_camera_coordinate_frame(extrinsic, size=1.0):
-    coordinate_frame = o3d.geometry.TriangleMesh.create_coordinate_frame(size=size)
-    transformation_matrix = np.eye(4)
-    transformation_matrix[:3, :4] = extrinsic
-    coordinate_frame.transform(transformation_matrix)
-    return coordinate_frame
-
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Visualize 3D point cloud using Open3D')
-    parser.add_argument('--input', type=str, help='path to .ply file')
-    args = parser.parse_args()
-
-    # Read point cloud from file
-    pcd = o3d.io.read_point_cloud(args.input)
-    # extrinsic, _ = read_images("colmap/data_undistort/sparse/left/images.txt")
-
-
-    # # Create camera coordinate frames from extrinsics
-    # camera_frames = [create_camera_coordinate_frame(e, size=0.3) for e in extrinsic]
-
-    # Visualize point cloud and camera frames
-    # o3d.visualization.draw_geometries([pcd, *camera_frames])
-    o3d.visualization.draw_geometries([pcd])
+# Visualize the scene and hand joints
+o3d.visualization.draw_geometries([pcd, left_points, left_lines, right_points, right_lines])

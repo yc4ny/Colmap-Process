@@ -6,7 +6,7 @@ def rename_files_in_folder(folder_path):
     files = os.listdir(folder_path)
 
     # Filter image files with the pattern: left_XXXXX.jpg
-    image_files = [f for f in files if re.match(r'scene_\d{5}\.jpg', f)]
+    image_files = [f for f in files if re.match(r'right_\d{5}\.jpg', f)]
 
     # Sort image files
     image_files.sort()
@@ -14,7 +14,7 @@ def rename_files_in_folder(folder_path):
     # Iterate over the image files and rename them
     for index, image_file in enumerate(image_files, start=1):
         old_path = os.path.join(folder_path, image_file)
-        new_name = f"scene_{index:05d}.jpg"
+        new_name = f"right_{index:05d}.jpg"
         new_path = os.path.join(folder_path, new_name)
         os.rename(old_path, new_path)
         print(f"Renamed {old_path} to {new_path}")
