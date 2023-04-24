@@ -7,12 +7,12 @@ def main():
     connections = [[0,1], [0,5], [0,17],[1,2], [2,3], [3,4], [0,5], [5,6],[6,7], [7,8],[5,9], [9,10], [10,11], [11,12], [9,13],
                    [13,14], [14,15], [15,16], [13,17], [17,18], [18,19], [19,20]]
     
-    with open("detect_hand/left/left_00002_joints.json", 'r') as file:
+    with open("detect_hand/undistort_left/left_00106_joints.json", 'r') as file:
         joints = json.load(file)
         left = joints['left']
         right = joints['right']
 
-    img = cv2.imread("preprocessed/left/left_00002.jpg")
+    img = cv2.imread("preprocessed/undist_left/left_00106.jpg")
 
     hands = [left[0], right[0]]
     green_color = (0, 255, 0)

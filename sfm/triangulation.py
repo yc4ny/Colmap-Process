@@ -207,11 +207,11 @@ def main():
     left_image = read_images_txt("colmap_data/left/images.txt")
     right_image = read_images_txt("colmap_data/right/images.txt")
     for i in range(len(left_image)):
-        if left_image[i]['name'] == "left_00177.jpg":
+        if left_image[i]['name'] == "left_00106.jpg":
             left_quaternion = left_image[i]['quaternion']
             left_translation = left_image[i]['translation']
     for i in range(len(right_image)):
-        if right_image[i]['name'] == "right_00177.jpg":
+        if right_image[i]['name'] == "right_00106.jpg":
             right_quaternion = right_image[i]['quaternion']
             right_translation = right_image[i]['translation']
     left_rotation = quaternion_to_rotation_matrix(left_quaternion)
@@ -224,29 +224,30 @@ def main():
     right_projectionMatrix = np.matmul(right_intrinsic, right_extrinsic)
 
     # Load Detected 2D Keypoints
-    with open("detect_hand/left/left_00177_joints.json", 'r') as file:
+    with open("detect_hand/undistort_left/left_00106_joints.json", 'r') as file:
         left_joints = json.load(file)
         l_leftjoints = np.array(left_joints['left'][0])
         l_rightjoints = np.array(left_joints['right'][0])
 
-    with open("detect_hand/left/left_00177_joints.json", 'r') as file:
+    with open("detect_hand/undistort_right/right_00106_joints.json", 'r') as file:
         right_joints = json.load(file)
         r_leftjoints = np.array(right_joints['left'][0])
         r_rightjoints = np.array(right_joints['right'][0])
 
     # LinearTriangulation(K1,K2, C1, R1, C2, R2, x1, x2)
     left_points3D = LinearTriangulation(left_intrinsic, right_intrinsic, left_translation, left_rotation, right_translation, right_rotation, l_leftjoints, r_leftjoints)
-    left_image = cv2.imread("preprocessed/left/left_00177.jpg")
+    left_image = cv2.imread("preprocessed/undistort_left/left_00106.jpg")
 
     # Reproject 3D points back onto the original left image
     reprojected_points = reproject_points(left_points3D[:, :3], left_projectionMatrix)
     print(reprojected_points)
     print("Average Reprojection Error: " + str(average_reprojection_error(reprojected_points, l_leftjoints)))
     
-    # Triangulation_nl(point3d,I1,I2,R1, C1, R2, C2, x1, x2):
-    optimized_points = Triangulation_nl(reprojected_points, left_intrinsic, right_intrinsic, left_rotation, left_translation, right_rotation, right_translation, l_leftjoints,r_leftjoints)
-    reprojected_points = reproject_points(optimized_points[:, :3], left_projectionMatrix)
-    print(reprojected_points)
-    print("Average Reprojection Error: " + str(average_reprojection_error(reprojected_points, l_leftjoints)))
+    # # Triangulation_nl(point3d,I1,I2,R1, C1, R2, C2, x1, x2):
+    # optimized_points = Triangulation_nl(reprojected_points, left_intrinsic, right_intrinsic, left_rotation, left_translation, right_rotation, right_translation, l_leftjoints,r_leftjoints)
+    # reprojected_points = reproject_points(optimized_points[:, :3], left_projectionMatrix)
+    # print(reprojected_points)
+    # print("Average Reprojection Error: " + str(average_reprojection_error(reprojected_points, l_leftjoints)))
+
 if __name__ == "__main__":
     main()

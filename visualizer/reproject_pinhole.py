@@ -76,28 +76,26 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params):
             proj_point = intrinsics @ (rot_matrix @ np.array([x, y, z]).reshape(3, 1) + t)
             proj_point = proj_point[:2] / proj_point[2]
             projected_points.append(proj_point.ravel())
-
-        undistorted_points = undistort_points(projected_points, k1, k2, p1, p2, fx, fy, cx, cy)
-
-        for point in undistorted_points:
+        
+        for point in projected_points:
             x_proj, y_proj = int(point[0]), int(point[1])
 
             if 0 <= x_proj < img.shape[1] and 0 <= y_proj < img.shape[0]:
                 cv2.circle(img, (x_proj, y_proj), 2, (0, 0, 255), -1)
 
-        cv2.imwrite(os.path.join( "preprocessed/reproject_hand", f"{img_data['name']}"), img)
+        cv2.imwrite(os.path.join( "preprocessed/reprojected_left", f"{img_data['name']}"), img)
 
 def main(images_folder, cameras_txt, images_txt, points3D_txt):
-    camera_params = read_cameras_txt(cameras_txt)
+    camera_params = 1803.52, 1803.52,1920,1080,0, 0, 0, 0
     images_data = read_images_txt(images_txt)
     points3D = read_points3D_txt(points3D_txt)
 
     reproject_3d_points(images_folder, images_data, points3D, camera_params)
 
 if __name__ == "__main__":
-    images_folder = "preprocessed/hand"  # Change this to the folder containing the images
-    cameras_txt = "colmap_data/hand/cameras.txt"  # Change this to the path of your cameras.txt file
-    images_txt = "colmap_data/hand/images.txt"  # Change this to the path of your images.txt file
-    points3D_txt = "colmap_data/hand/points3D.txt"  # Change this to the path of your points3D.txt file
+    images_folder = "preprocessed/undistorted_left"  # Change this to the folder containing the images
+    cameras_txt = "colmap_data/left/cameras.txt"  # Change this to the path of your cameras.txt file
+    images_txt = "colmap_data/left/images.txt"  # Change this to the path of your images.txt file
+    points3D_txt = "colmap_data/left/points3D.txt"  # Change this to the path of your points3D.txt file
 
     main(images_folder, cameras_txt, images_txt, points3D_txt)

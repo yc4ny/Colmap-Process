@@ -55,7 +55,7 @@ def main(args):
         database_path=f"{data_folder}/database.db",
         image_path=image_path,
         single_camera=1,
-        camera_model="OPENCV"
+        camera_model="SIMPLE_PINHOLE"
     )
 
     # Feature Matching
@@ -82,7 +82,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run COLMAP with initial or undistorted images.")
-    parser.add_argument("--image_path", action="store_true", help="Image paths", default = "preprocessed/scene")
+    parser.add_argument("--image_path", action="store_true", help="Image paths", default = "preprocessed/undistorted_scene")
     parser.add_argument("--colmap_data",action="store_true", help="Path to colmap data", default = "colmap_data")
     args = parser.parse_args()
 

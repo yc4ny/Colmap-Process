@@ -8,8 +8,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
-parser.add_argument('--scene', help='static scene video file', default='videos/scene.MP4', required=False)
-parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/left.MP4', required=False)
+parser.add_argument('--scene', help='static scene video file', default='videos/scene.mp4', required=False)
+parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/hand.mp4', required=False)
 parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/right.MP4', required=False)
 parser.add_argument('--output', help='output dir of processed frames', default='preprocessed', required=False)
 args = parser.parse_args()
@@ -79,8 +79,8 @@ def main():
     # Create a list of tasks for each video file
     tasks = [
         (scene_vid, args.output, args.scene, True),
-        (camera1_vid, args.output, args.camera_1, False),
-        (camera2_vid, args.output, args.camera_2, False)
+        # (camera1_vid, args.output, args.camera_1, False),
+        # (camera2_vid, args.output, args.camera_2, False)
     ]
 
     # Use ThreadPoolExecutor for parallel execution

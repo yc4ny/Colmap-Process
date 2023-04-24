@@ -7,14 +7,14 @@ def run_command(command):
 
 def main():
     # Set the paths
-    image_path = "preprocessed/right"
+    image_path = "preprocessed/undistorted_right"
     existing_reconstruction_path = "colmap_data"
     database_path = os.path.join(existing_reconstruction_path, "database.db")
-    input_path = os.path.join(existing_reconstruction_path, "sparse/0")
+    input_path = os.path.join(existing_reconstruction_path, "left")
     output_path = os.path.join(existing_reconstruction_path, "right")
     
     # Feature extraction
-    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model OPENCV --ImageReader.camera_params 1790.45,1799.35,1920,1080,-0.194308,0.0279434,-0.000956758,-1.04776e-05"
+    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model SIMPLE_PINHOLE --ImageReader.camera_params 1749.74,1920,1080"
     run_command(feature_extractor_cmd)
     
     # Feature matching

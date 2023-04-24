@@ -56,7 +56,7 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "preprocessed/left"
-    output_folder = "detect_hand/left"
-    output_images_folder = "preprocessed/left_joints"
+    input_folder = "preprocessed/undist_left"
+    output_folder = "detect_hand/undistort_left"
+    output_images_folder = "preprocessed/undistort_left_joints"
     detect_hand_joints(input_folder, output_folder, output_images_folder)
