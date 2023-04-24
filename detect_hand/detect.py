@@ -33,7 +33,7 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
                 for hand_landmarks in results.multi_hand_landmarks:
                     handedness = results.multi_handedness[results.multi_hand_landmarks.index(hand_landmarks)].classification[0].label
 
-                    if handedness == "Left":
+                    if handedness == "Right":
                         hand_type = "left"
                     else:
                         hand_type = "right"
@@ -56,7 +56,7 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "preprocessed/single_left"
+    input_folder = "preprocessed/left"
     output_folder = "detect_hand/left"
     output_images_folder = "preprocessed/left_joints"
     detect_hand_joints(input_folder, output_folder, output_images_folder)
