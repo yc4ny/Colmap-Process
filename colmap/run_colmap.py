@@ -55,7 +55,7 @@ def main(args):
         database_path=f"{data_folder}/database.db",
         image_path=image_path,
         single_camera=1,
-        camera_model="SIMPLE_RADIAL"
+        camera_model= args.camera_model
     )
 
     # Feature Matching
@@ -70,20 +70,21 @@ def main(args):
 
     # Save output as txt file
     save_output_as_txt(
-        input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/sparse/0/",
+        input_path=f"{data_folder}/scene",
+        output_path=f"{data_folder}/scene",
         output_type="TXT"
     )
 
     save_output_as_ply(
-        input_path=f"{data_folder}/sparse/0",
-        output_path=f"{data_folder}/sparse/0/",
+        input_path=f"{data_folder}/scene",
+        output_path=f"{data_folder}/scene",
     )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run COLMAP with initial or undistorted images.")
     parser.add_argument("--image_path", action="store_true", help="Image paths", default = "preprocessed/scene")
     parser.add_argument("--colmap_data",action="store_true", help="Path to colmap data", default = "colmap_data")
+    parser.add_argument("--camera_model",action="store_true", help="Type of camera model", default = "SIMPLE_RADIAL")
     args = parser.parse_args()
 
     main(args)
