@@ -79,23 +79,20 @@ def visualize_3d_joints(joints_3D):
 
 def main(): 
 
-    # # Loading Intrinsic Parameters
-    # fx_l, fy_l, cx_l, cy_l,k1_l, k2_l, p1_l, p2_l= read_cameras_txt("colmap_data/left/cameras.txt")
+    # Loading Intrinsic Parameters
+    fx_l, fy_l, cx_l, cy_l, _, _, _, _= read_cameras_txt("colmap_data/left/cameras.txt")
     left_intrinsic = np.array([
-        [1803.52, 0, 1920],
-        [0, 1803.52, 1080],
+        [fx_l, 0, cx_l],
+        [0, fy_l, cy_l],
         [0, 0, 1]
     ])
 
-    # fx_r, fy_r, cx_r, cy_r,k1_r, k2_r, p1_r, p2_r= read_cameras_txt("colmap_data/right/cameras.txt")
+    fx_r, fy_r, cx_r, cy_r, _, _, _, _= read_cameras_txt("colmap_data/right/cameras.txt")
     right_intrinsic = np.array([
-        [1733.9, 0, 1920],
-        [0, 1733.9, 1080],
+        [fx_r, 0, cx_r],
+        [0, fy_r, cy_r],
         [0, 0, 1]
     ])
-
-    # print(intrinsic_left)
-    # print(intrinsic_right)   
 
     # Loading Extrinsic Parameters
     left_image = read_images_txt("colmap_data/right/images.txt")
@@ -108,8 +105,10 @@ def main():
         if right_image[i]['name'] == "right_00165.jpg":
             right_quaternion = right_image[i]['quaternion']
             right_translation = right_image[i]['translation']
+
     left_rotation = quaternion_to_rotation_matrix(left_quaternion)
     right_rotation = quaternion_to_rotation_matrix(right_quaternion)
+
     left_extrinsic = np.column_stack((left_rotation, left_translation))
     right_extrinsic = np.column_stack((right_rotation, right_translation))
 
@@ -117,43 +116,16 @@ def main():
     left_projectionMatrix = np.matmul(left_intrinsic, left_extrinsic)
     right_projectionMatrix = np.matmul(right_intrinsic, right_extrinsic)
 
-    # l_leftjoints = np.array([
-    #     [2685,549],
-    #     [3004,947],
-    #     [2831,1064],
-    #     [2747,1159],
-    #     [2541,1355],
-    #     [2528,1185],
-    #     [2306,1508],
-    #     [2345,1149],
-    #     [2159,1544],
-    #     [2150,1058],
-    #     [1889,1472]
-    # ])
-    # r_leftjoints = np.array([
-    #     [141,6],
-    #     [857,184],
-    #     [1040,389],
-    #     [607,323],
-    #     [1148,678],
-    #     [493,317],
-    #     [1051,764],
-    #     [516,373],
-    #     [915,725],
-    #     [502,339],
-    #     [671,556]
-    # ])
-    # Load Detected 2D Keypoints
-
+    # Loading 2D Joints
     with open("detect_hand/left/left_00443_joints.json", 'r') as file:
         left_joints = json.load(file)
         l_leftjoints = np.array(left_joints['left'][0])
-        # l_rightjoints = np.array(left_joints['right'][0])
+        l_rightjoints = np.array(left_joints['right'][0])
 
     with open("detect_hand/right/right_00443_joints.json", 'r') as file:
         right_joints = json.load(file)
         r_leftjoints = np.array(right_joints['left'][0])
-        # r_rightjoints = np.array(right_joints['right'][0])
+        r_rightjoints = np.array(right_joints['right'][0])
 
     # Triangulate the 2D joints to obtain the 3D joints
     leftjoints_3D = cv2.triangulatePoints(left_projectionMatrix, right_projectionMatrix, l_leftjoints.T, r_leftjoints.T)
@@ -161,15 +133,13 @@ def main():
     # Convert the 3D joints from homogeneous to Euclidean coordinates
     leftjoints_3D = leftjoints_3D[:3, :] / leftjoints_3D[3, :]
 
-    print("3D Joints:\n", leftjoints_3D.T)
+    print("Joints:\n", leftjoints_3D.T)
     leftjoints_3D_list = leftjoints_3D.T.tolist()
-    output_dict = {'3D_Joints': leftjoints_3D_list}
+    output_dict = {'Joints': leftjoints_3D_list}
 
     # Write the dictionary to a JSON file
-    with open('output.json', 'w') as outfile:
+    with open('joints3d.json', 'w') as outfile:
         json.dump(output_dict, outfile, indent=4)
-    
-    projected_points = reproject_points(leftjoints_3D.T, left_projectionMatrix)
 
 if __name__ == "__main__":
     main()
