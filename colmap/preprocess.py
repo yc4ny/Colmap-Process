@@ -9,8 +9,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
 parser.add_argument('--scene', help='static scene video file', default='videos/scene.mp4', required=False)
-parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/hand.mp4', required=False)
-parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/right.MP4', required=False)
+parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/left.mp4', required=False)
+parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/right.mp4', required=False)
 parser.add_argument('--output', help='output dir of processed frames', default='preprocessed', required=False)
 args = parser.parse_args()
 
