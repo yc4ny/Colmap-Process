@@ -6,3 +6,4 @@ temp
 triangulation
 temp_img
 check_existance.py
+SuperGluePretrainedNetwork/*
