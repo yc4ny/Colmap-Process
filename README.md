@@ -1,1 +1,1 @@
-# Camera-Pose-Estimation
+# Automating Colmap
