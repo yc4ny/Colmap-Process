@@ -2,26 +2,36 @@ import cv2
 import numpy as np
 import os
 import glob
+import argparse
 from tqdm import tqdm
 
-# Camera parameters
+# Define command-line arguments
+parser = argparse.ArgumentParser(description="Undistort a folder of images using pre-defined camera calibration")
+parser.add_argument("--intrinsic", nargs=4, type=float, required=True, help="Camera intrinsic parameters: fx, fy, cx, cy")
+parser.add_argument("--distortion", nargs='+', type=float, required=True, help="Camera distortion coefficients: k1, [k2, [p1, [p2]]]")
+parser.add_argument("--input_folder", type=str, required=True, help="Path to the input folder containing images to undistort")
+parser.add_argument("--output_folder", type=str, required=True, help="Path to the output folder to save undistorted images")
+args = parser.parse_args()
+
+# Parse intrinsic and distortion parameters from command-line arguments
 intrinsic = np.array([
-    [1769.60561310104, 0, 1927.08704019384],
-    [0, 1763.89532833387, 1064.40054933721],
+    [args.intrinsic[0], 0, args.intrinsic[2]],
+    [0, args.intrinsic[1], args.intrinsic[3]],
     [0., 0., 1.]
 ])
-radial_distortion = np.array([
-    [-0.244052127306437],
-    [0.0597008096110524]
-])
 
-# Set distortion coefficients to zero except for radial distortion
 distortion = np.zeros((5, 1), dtype=np.float64)
-distortion[0:2] = radial_distortion
+distortion[0:len(args.distortion)] = args.distortion
+
+# Set any remaining distortion coefficients to zero
+num_distortion_coeffs = len(args.distortion)
+if num_distortion_coeffs < 5:
+    for i in range(num_distortion_coeffs, 5):
+        distortion[i] = 0
 
 # Path to the folder containing images to undistort
-input_folder = 'preprocessed/scene'
-output_folder = 'preprocessed/undistorted_scene'
+input_folder = args.input_folder
+output_folder = args.output_folder
 
 # Create output folder if it does not exist
 if not os.path.exists(output_folder):
