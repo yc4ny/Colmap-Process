@@ -2,31 +2,31 @@ import json
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Load the JSON data
-with open("output_3d_joints.json", "r") as f:
-    data = json.load(f)
+def load_3d_joints_from_json(file_path):
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    return data['3D_Joints']
 
-# Extract left and right joint coordinates
-left_joints = data["left"]
-right_joints = data["right"]
+def visualize_3d_joints(joints_3D):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
-# Create a 3D scatter plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection="3d")
+    unique_joints = []
+    for point in joints_3D:
+        if point not in unique_joints:
+            unique_joints.append(point)
+            ax.scatter(point[0], point[1], point[2], c='r', marker='o')
 
-# Plot left and right joint coordinates
-for i, (left_joint, right_joint) in enumerate(zip(left_joints, right_joints)):
-    left_xs, left_ys, left_zs = zip(*left_joint)
-    right_xs, right_ys, right_zs = zip(*right_joint)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
 
-    ax.scatter(left_xs, left_ys, left_zs, c="r", marker="o", label=f"Left {i+1}")
-    ax.scatter(right_xs, right_ys, right_zs, c="b", marker="o", label=f"Right {i+1}")
+    plt.show()
+    
+def main():
+    file_path = 'output.json'
+    joints_3D = load_3d_joints_from_json(file_path)
+    visualize_3d_joints(joints_3D)
 
-# Set axis labels
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-ax.set_zlabel("Z")
-
-# Set the legend and display the plot
-ax.legend()
-plt.show()
+if __name__ == "__main__":
+    main()

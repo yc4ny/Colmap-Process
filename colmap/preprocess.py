@@ -79,7 +79,7 @@ def main():
     # Create a list of tasks for each video file
     tasks = [
         (scene_vid, args.output, args.scene, True),
-        # (camera1_vid, args.output, args.camera_1, False),
+        (camera1_vid, args.output, args.camera_1, False),
         # (camera2_vid, args.output, args.camera_2, False)
     ]
 

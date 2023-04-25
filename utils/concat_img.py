@@ -32,7 +32,7 @@ def concatenate_images(folder1, folder2, output_folder):
         if img1.shape[1] != img2.shape[1]:
             raise ValueError(f"Images {img_file1} and {img_file2} must have the same width")
 
-        concatenated_img = cv2.vconcat([img1, img2])
+        concatenated_img = cv2.hconcat([img1, img2])
         output_image_path = os.path.join(output_folder, img_file1)
         cv2.imwrite(output_image_path, concatenated_img)
 

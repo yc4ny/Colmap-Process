@@ -16,7 +16,7 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
     filenames = [filename for filename in os.listdir(input_folder) if filename.endswith(".jpg")]
 
-    with mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.1) as hands:
+    with mp_hands.Hands(max_num_hands=2, min_detection_confidence=0.7) as hands:
         for filename in tqdm(filenames, desc="Processing images"):
             image_path = os.path.join(input_folder, filename)
             output_path = os.path.join(output_folder, f"{os.path.splitext(filename)[0]}_joints.json")
@@ -56,7 +56,7 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "preprocessed/undist_left"
-    output_folder = "detect_hand/undistort_left"
-    output_images_folder = "preprocessed/undistort_left_joints"
+    input_folder = "preprocessed/undistorted_right"
+    output_folder = "detect_hand/right"
+    output_images_folder = "preprocessed/right_joints"
     detect_hand_joints(input_folder, output_folder, output_images_folder)
