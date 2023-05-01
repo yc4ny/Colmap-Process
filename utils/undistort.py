@@ -21,13 +21,17 @@ intrinsic = np.array([
 ])
 
 distortion = np.zeros((5, 1), dtype=np.float64)
-distortion[0:len(args.distortion)] = args.distortion
+
+# Assign the distortion coefficients one by one
+for i, coeff in enumerate(args.distortion):
+    distortion[i, 0] = coeff
 
 # Set any remaining distortion coefficients to zero
 num_distortion_coeffs = len(args.distortion)
 if num_distortion_coeffs < 5:
     for i in range(num_distortion_coeffs, 5):
         distortion[i] = 0
+
 
 # Path to the folder containing images to undistort
 input_folder = args.input_folder

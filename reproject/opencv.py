@@ -64,8 +64,8 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params):
 
     for img_data in tqdm(images_data, desc="Processing frames"):
         img = cv2.imread(os.path.join(images_folder, img_data['name']))
-        if img_data['camera_id'] != 2:
-            continue
+        # if img_data['camera_id'] != 2:
+        #     continue
         rot_matrix = quaternion_to_rotation_matrix(img_data['quaternion'])
         t = np.array(img_data['translation']).reshape(3, 1)
         # print(rot_matrix)
@@ -83,9 +83,9 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params):
             x_proj, y_proj = int(point[0]), int(point[1])
 
             if 0 <= x_proj < img.shape[1] and 0 <= y_proj < img.shape[0]:
-                cv2.circle(img, (x_proj, y_proj), 2, (0, 0, 255), -1)
+                cv2.circle(img, (x_proj, y_proj), 4, (0, 0, 255), -1)
 
-        cv2.imwrite(os.path.join( "preprocessed/reproject_hand", f"{img_data['name']}"), img)
+        cv2.imwrite(os.path.join( "preprocessed/reproject_scene", f"{img_data['name']}"), img)
 
 def main(images_folder, cameras_txt, images_txt, points3D_txt):
     camera_params = read_cameras_txt(cameras_txt)
@@ -95,9 +95,9 @@ def main(images_folder, cameras_txt, images_txt, points3D_txt):
     reproject_3d_points(images_folder, images_data, points3D, camera_params)
 
 if __name__ == "__main__":
-    images_folder = "preprocessed/hand"  # Change this to the folder containing the images
-    cameras_txt = "colmap_data/hand/cameras.txt"  # Change this to the path of your cameras.txt file
-    images_txt = "colmap_data/hand/images.txt"  # Change this to the path of your images.txt file
-    points3D_txt = "colmap_data/hand/points3D.txt"  # Change this to the path of your points3D.txt file
+    images_folder = "preprocessed/scene"  # Change this to the folder containing the images
+    cameras_txt = "colmap_data/sparse/0/cameras.txt"  # Change this to the path of your cameras.txt file
+    images_txt = "colmap_data/sparse/0/images.txt"  # Change this to the path of your images.txt file
+    points3D_txt = "colmap_data/sparse/0/points3D.txt"  # Change this to the path of your points3D.txt file
 
     main(images_folder, cameras_txt, images_txt, points3D_txt)

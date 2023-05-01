@@ -8,9 +8,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
-parser.add_argument('--scene', help='static scene video file', default='videos/scene.mp4', required=False)
-parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/left.mp4', required=False)
-parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/right.mp4', required=False)
+parser.add_argument('--scene', help='static scene video file', default='videos/desk1/scene.MP4', required=False)
+parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/desk1/head.MP4', required=False)
+parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/desk1/left.MP4', required=False)
+parser.add_argument('--camera_3', help='video file of moving camera in scene', default='videos/desk1/right.MP4', required=False)
 parser.add_argument('--output', help='output dir of processed frames', default='preprocessed', required=False)
 args = parser.parse_args()
 
@@ -75,12 +76,14 @@ def main():
     scene_vid = cv2.VideoCapture(args.scene)
     camera1_vid = cv2.VideoCapture(args.camera_1)
     camera2_vid = cv2.VideoCapture(args.camera_2)
+    camera3_vid = cv2.VideoCapture(args.camera_3)
 
     # Create a list of tasks for each video file
     tasks = [
         (scene_vid, args.output, args.scene, True),
         (camera1_vid, args.output, args.camera_1, False),
-        # (camera2_vid, args.output, args.camera_2, False)
+        (camera2_vid, args.output, args.camera_2, False),
+        (camera3_vid, args.output, args.camera_3, False)
     ]
 
     # Use ThreadPoolExecutor for parallel execution
