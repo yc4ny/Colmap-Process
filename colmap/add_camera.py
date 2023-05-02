@@ -15,11 +15,11 @@ def save_output_as_txt(input_path, output_path, output_type):
 
 def main():
     # Set the paths
-    image_path = "preprocessed/undistort_opencv_head"
+    image_path = "preprocessed/undistort_opencv_right"
     existing_reconstruction_path = "colmap_data"
     database_path = os.path.join(existing_reconstruction_path, "database.db")
-    input_path = os.path.join(existing_reconstruction_path, "left")
-    output_path = os.path.join(existing_reconstruction_path, "head")
+    input_path = os.path.join(existing_reconstruction_path, "sparse/0")
+    output_path = os.path.join(existing_reconstruction_path, "right")
     
     # Feature extraction
     feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model SIMPLE_PINHOLE --ImageReader.camera_params 1929.11,1920,1080"

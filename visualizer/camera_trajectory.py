@@ -7,7 +7,7 @@ import time
 with open('extrinsics.pkl', 'rb') as f:
     extrinsics = pickle.load(f)
 
-pcd = o3d.io.read_point_cloud('scene.ply')
+pcd = o3d.io.read_point_cloud('colmap_data/right/points.ply')
 
 # Visualize point cloud and camera locations sequentially
 vis = o3d.visualization.Visualizer()
