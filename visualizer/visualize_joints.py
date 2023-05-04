@@ -4,6 +4,7 @@ import numpy as np
 import os 
 import glob 
 import time
+import json 
 
 def align_joints_to_camera(joints, camera_location):
     # Calculate the translation vector needed to align the first joint with the camera location
@@ -51,14 +52,18 @@ def prepare_frame_geometry(data, connections, extrinsics, scale=5):
 
     return left, right
 
+
 def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None):
     # Load the PLY file
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
 
-    viewer = o3d.visualization.VisualizerWithKeyCallback()
-    viewer.create_window(window_name='Hand', width=2400, height=1800)
+    viewer = o3d.visualization.Visualizer()
+    viewer.create_window(window_name='Scene', width=2400, height=1800)
     viewer.add_geometry(colmap_pcd)
+    viewer.run()
+    param = viewer.get_view_control().convert_to_pinhole_camera_parameters()
+    o3d.io.write_pinhole_camera_parameters("output_extrinsic/viewpoint.json", param)
 
     # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
     for pkl_file in pkl_files:
@@ -70,8 +75,11 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
         for hand_geom in frame_geometry:
             for geom in hand_geom:
                 viewer.add_geometry(geom)
+                
+        param = o3d.io.read_pinhole_camera_parameters("output_extrinsic/viewpoint.json")
+        ctr = viewer.get_view_control()
+        ctr.convert_from_pinhole_camera_parameters(param)
 
-        # Update the scene and pause for a while to simulate animation
         viewer.poll_events()
         viewer.update_renderer()
         time.sleep(0.1)
@@ -80,8 +88,6 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
         for hand_geom in frame_geometry:
             for geom in hand_geom:
                 viewer.remove_geometry(geom)
-
-    viewer.run()
     viewer.destroy_window()
 
 def main():
