@@ -34,23 +34,34 @@ def create_hand_geometry(joints, connections, color=[1, 0, 0]):
 
 
 def prepare_frame_geometry(data, connections, extrinsics, scale=5):
-    left_joints = data['pred_output_list'][0]['left_hand']['pred_joints_smpl']
-    right_joints = data['pred_output_list'][0]['right_hand']['pred_joints_smpl']
+    frame_geometry = []
+    if 'pred_joints_smpl' in data['pred_output_list'][0]['left_hand']:
+        left_joints = data['pred_output_list'][0]['left_hand']['pred_joints_smpl']
+        base_name = os.path.splitext(os.path.basename(data['image_path']))[0]
+        base_name = base_name.replace('_prediction_result', '')
 
-    base_name = os.path.splitext(os.path.basename(data['image_path']))[0]
-    base_name = base_name.replace('_prediction_result', '')
+        head_extrinsic_matrix = extrinsics['head'][base_name + '.jpg']
+        left_extrinsic_matrix = extrinsics['left'][base_name.replace('head', 'left') + '.jpg']
 
-    head_extrinsic_matrix = extrinsics['head'][base_name + '.jpg']
-    left_extrinsic_matrix = extrinsics['left'][base_name.replace('head', 'left') + '.jpg']
-    right_extrinsic_matrix = extrinsics['right'][base_name.replace('head', 'right') + '.jpg']
+        left_joints = align_joints_to_camera(left_joints * scale, -left_extrinsic_matrix[:, :3].T @ left_extrinsic_matrix[:, 3])
 
-    left_joints = align_joints_to_camera(left_joints * scale, -left_extrinsic_matrix[:, :3].T @ left_extrinsic_matrix[:, 3])
-    right_joints = align_joints_to_camera(right_joints * scale, -right_extrinsic_matrix[:, :3].T @ right_extrinsic_matrix[:, 3])
+        left = create_hand_geometry(left_joints, connections, color=[1, 0, 0])
+        frame_geometry.append(left)
 
-    left = create_hand_geometry(left_joints, connections, color=[1, 0, 0])
-    right = create_hand_geometry(right_joints, connections, color=[1, 0, 0])
+    if 'pred_joints_smpl' in data['pred_output_list'][0]['right_hand']:
+        right_joints = data['pred_output_list'][0]['right_hand']['pred_joints_smpl']
+        base_name = os.path.splitext(os.path.basename(data['image_path']))[0]
+        base_name = base_name.replace('_prediction_result', '')
 
-    return left, right
+        head_extrinsic_matrix = extrinsics['head'][base_name + '.jpg']
+        right_extrinsic_matrix = extrinsics['right'][base_name.replace('head', 'right') + '.jpg']
+
+        right_joints = align_joints_to_camera(right_joints * scale, -right_extrinsic_matrix[:, :3].T @ right_extrinsic_matrix[:, 3])
+
+        right = create_hand_geometry(right_joints, connections, color=[1, 0, 0])
+        frame_geometry.append(right)
+
+    return frame_geometry
 
 
 def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None):
@@ -58,61 +69,43 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
 
-    viewer = o3d.visualization.Visualizer()
-    viewer.create_window(window_name='Scene', width=2400, height=1800)
-    viewer.add_geometry(colmap_pcd)
-    viewer.run()
-    param = viewer.get_view_control().convert_to_pinhole_camera_parameters()
-    o3d.io.write_pinhole_camera_parameters("output_extrinsic/viewpoint.json", param)
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(window_name='Scene', width=2400, height=1800)
+
+    vis.add_geometry(colmap_pcd)
+
+    ctr = vis.get_view_control()
 
     # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
     for pkl_file in pkl_files:
         with open(pkl_file, 'rb') as f:
             data = pickle.load(f)
-
+        print(pkl_file)
         # Prepare and visualize the scene for the current frame
         frame_geometry = prepare_frame_geometry(data, connections, extrinsics, scale)
         for hand_geom in frame_geometry:
             for geom in hand_geom:
-                viewer.add_geometry(geom)
-                
-        param = o3d.io.read_pinhole_camera_parameters("output_extrinsic/viewpoint.json")
-        ctr = viewer.get_view_control()
-        ctr.convert_from_pinhole_camera_parameters(param)
-
-        viewer.poll_events()
-        viewer.update_renderer()
-        time.sleep(0.1)
+                vis.add_geometry(geom)
+        ctr.change_field_of_view(60.0)
+        ctr.set_front((-0.25923446687325102, 0.36050303933990713, -0.89601063041217921))
+        ctr.set_lookat((0.17016508526290833, 0.69597191642482215, 5.6060528317327982))
+        ctr.set_up((0.062566752559073763, -0.91950834402546544, -0.38805902481678978))
+        ctr.set_zoom(0.23999999999999957)
+        vis.poll_events()
+        vis.update_renderer()
+        time.sleep(1/30)
 
         # Remove current frame geometries before adding new ones
         for hand_geom in frame_geometry:
             for geom in hand_geom:
-                viewer.remove_geometry(geom)
-    viewer.destroy_window()
+                vis.remove_geometry(geom)
+
+    vis.destroy_window()
 
 def main():
     connections = [
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 4],
-        [0, 5],
-        [5, 6],
-        [6, 7],
-        [7, 8],
-        [0, 9], 
-        [9, 10],
-        [10, 11],
-        [11, 12],
-        [0, 13],
-        [13, 14],
-        [14, 15],
-        [15, 16],
-        [0, 17],
-        [17, 18],
-        [18, 19],
-        [19, 20]
-    ]
+        [0, 1],[1, 2],[2, 3],[3, 4],[0, 5],[5, 6],[6, 7],[7, 8],[0, 9],[9, 10],[10, 11],[11, 12],
+        [0, 13],[13, 14],[14, 15],[15, 16],[0, 17],[17, 18],[18, 19],[19, 20]]
 
     ply_file_path = 'colmap_data/right/points.ply'
     # Get all the .pkl files in the joints_3d/head/ folder
