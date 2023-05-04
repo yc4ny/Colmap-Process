@@ -16,7 +16,7 @@ def extract_extrinsics(images_txt):
         if not line or line.startswith('#'):
             continue
 
-        if re.match(r'head_\d{5}\.jpg', line.split()[-1]):
+        if re.match(r'right_\d{5}\.jpg', line.split()[-1]):
             image_data = line.split()
             qw, qx, qy, qz = map(float, image_data[1:5])
             tx, ty, tz = map(float, image_data[5:8])
@@ -29,10 +29,10 @@ def extract_extrinsics(images_txt):
 
     return extrinsics
 
-images_txt_path = 'colmap_data/head/images.txt'
+images_txt_path = 'colmap_data/right/images.txt'
 extrinsics = extract_extrinsics(images_txt_path)
 
-with open('extrinsics.pkl', 'wb') as file:
+with open('right_extrinsics.pkl', 'wb') as file:
     pickle.dump(extrinsics, file)
 
 print(f"Saved extrinsics for {len(extrinsics)} images in extrinsics.pkl")

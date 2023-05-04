@@ -1,54 +1,88 @@
 import pickle 
 import open3d as o3d
 import numpy as np 
+import os 
+import glob 
+import time
 
-def visualize_3d_points(left_joints, right_joints, connections, ply_file_path, scale = 10):
+def align_joints_to_camera(joints, camera_location):
+    # Calculate the translation vector needed to align the first joint with the camera location
+    translation_vector = camera_location - joints[0]
+
+    # Create a new array to store the aligned joints
+    aligned_joints = np.zeros_like(joints)
+
+    # Translate each joint in the array
+    for i, joint in enumerate(joints):
+        aligned_joints[i] = joint + translation_vector
+
+    return aligned_joints
+
+def create_hand_geometry(joints, connections, color=[1, 0, 0]):
+    hand_pcd = o3d.geometry.PointCloud()
+    hand_pcd.points = o3d.utility.Vector3dVector(joints)
+    hand_pcd.paint_uniform_color(color)
+    hand_pcd.estimate_normals()
+
+    hand_lines = o3d.geometry.LineSet()
+    hand_lines.points = hand_pcd.points
+    hand_lines.lines = o3d.utility.Vector2iVector(connections)
+    hand_lines.colors = o3d.utility.Vector3dVector([[0, 0, 1] for _ in range(len(connections))])  # Blue color for the lines
+
+    return hand_pcd, hand_lines
+
+
+def prepare_frame_geometry(data, connections, extrinsics, scale=5):
+    left_joints = data['pred_output_list'][0]['left_hand']['pred_joints_smpl']
+    right_joints = data['pred_output_list'][0]['right_hand']['pred_joints_smpl']
+
+    base_name = os.path.splitext(os.path.basename(data['image_path']))[0]
+    base_name = base_name.replace('_prediction_result', '')
+
+    head_extrinsic_matrix = extrinsics['head'][base_name + '.jpg']
+    left_extrinsic_matrix = extrinsics['left'][base_name.replace('head', 'left') + '.jpg']
+    right_extrinsic_matrix = extrinsics['right'][base_name.replace('head', 'right') + '.jpg']
+
+    left_joints = align_joints_to_camera(left_joints * scale, -left_extrinsic_matrix[:, :3].T @ left_extrinsic_matrix[:, 3])
+    right_joints = align_joints_to_camera(right_joints * scale, -right_extrinsic_matrix[:, :3].T @ right_extrinsic_matrix[:, 3])
+
+    left = create_hand_geometry(left_joints, connections, color=[1, 0, 0])
+    right = create_hand_geometry(right_joints, connections, color=[1, 0, 0])
+
+    return left, right
+
+def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None):
     # Load the PLY file
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
 
-    # Create the PointCloud object for the hand joints
-    left = o3d.geometry.PointCloud()
-    left.points = o3d.utility.Vector3dVector(left_joints * scale)
-    left.paint_uniform_color([1, 0, 0])  # Red color for the hand joints
-    left.estimate_normals()
-
-    # Create the PointCloud object for the hand joints
-    right = o3d.geometry.PointCloud()
-    right.points = o3d.utility.Vector3dVector(right_joints * scale)
-    right.paint_uniform_color([1, 0, 0])  # Red color for the hand joints
-    right.estimate_normals()
-
-    # Create lines between the connected joints
-    left_lines = o3d.geometry.LineSet()
-    left_lines.points = left.points
-    left_lines.lines = o3d.utility.Vector2iVector(connections)
-    left_lines.colors = o3d.utility.Vector3dVector([[0, 0, 1] for _ in range(len(connections))])  # Blue color for the lines
-
-    # Create lines between the connected joints
-    right_lines = o3d.geometry.LineSet()
-    right_lines.points = right.points
-    right_lines.lines = o3d.utility.Vector2iVector(connections)
-    right_lines.colors = o3d.utility.Vector3dVector([[0, 0, 1] for _ in range(len(connections))])  # Blue color for the lines
-
-    # Create a custom RenderOption
-    custom_render_option = o3d.visualization.RenderOption()
-    custom_render_option.line_width = 5  # Set the line width to 5 (default is 1)
-
-    # Visualize the point clouds and the lines together with the custom RenderOption
     viewer = o3d.visualization.VisualizerWithKeyCallback()
-    viewer.create_window(window_name='PLY and Hand Joints', width=800, height=600)
+    viewer.create_window(window_name='Hand', width=2400, height=1800)
     viewer.add_geometry(colmap_pcd)
-    viewer.add_geometry(left)
-    viewer.add_geometry(left_lines)
-    viewer.add_geometry(right)
-    viewer.add_geometry(right_lines)
-    viewer.get_render_option().line_width = custom_render_option.line_width
+
+    # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
+    for pkl_file in pkl_files:
+        with open(pkl_file, 'rb') as f:
+            data = pickle.load(f)
+
+        # Prepare and visualize the scene for the current frame
+        frame_geometry = prepare_frame_geometry(data, connections, extrinsics, scale)
+        for hand_geom in frame_geometry:
+            for geom in hand_geom:
+                viewer.add_geometry(geom)
+
+        # Update the scene and pause for a while to simulate animation
+        viewer.poll_events()
+        viewer.update_renderer()
+        time.sleep(0.1)
+
+        # Remove current frame geometries before adding new ones
+        for hand_geom in frame_geometry:
+            for geom in hand_geom:
+                viewer.remove_geometry(geom)
+
     viewer.run()
     viewer.destroy_window()
-    # # Visualize the point clouds and the lines together
-    # o3d.visualization.draw_geometries([colmap_pcd, left, left_lines, right, right_lines], window_name='PLY and Hand Joints', width=800, height=600)
-
 
 def main():
     connections = [
@@ -74,18 +108,24 @@ def main():
         [19, 20]
     ]
 
-    ply_file_path = 'colmap_data/right/points.ply' 
+    ply_file_path = 'colmap_data/right/points.ply'
+    # Get all the .pkl files in the joints_3d/head/ folder
+    pkl_files = sorted(glob.glob('joints_3d/head/*.pkl'))
 
-    with open('joints_3d/head/head_00000_prediction_result.pkl', 'rb') as f:
-        data = pickle.load(f)
-    
-    left_joints = data['pred_output_list'][0]['left_hand']['pred_joints_smpl']
-    right_joints = data['pred_output_list'][0]['right_hand']['pred_joints_smpl']
-    print(left_joints.shape)
-    
-    visualize_3d_points(left_joints,right_joints,  connections, ply_file_path)
+    # Load extrinsics using the corresponding key for head, left, and right
+    with open('output_extrinsic/head_extrinsic.pkl', 'rb') as f:
+        head_extrinsics = pickle.load(f)
 
+    with open('output_extrinsic/left_extrinsic.pkl', 'rb') as f:
+        left_extrinsics = pickle.load(f)
 
+    with open('output_extrinsic/right_extrinsic.pkl', 'rb') as f:
+        right_extrinsics = pickle.load(f)
+
+    extrinsics = {'head': head_extrinsics, 'left': left_extrinsics, 'right': right_extrinsics}
+
+    # Call visualize_3d_points() with the list of pkl_files and extrinsics dictionary
+    visualize_3d_points(pkl_files, connections, ply_file_path, scale=5, extrinsics=extrinsics)
 
 if __name__ == "__main__":
     main()
