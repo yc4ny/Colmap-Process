@@ -1,8 +1,31 @@
+# MIT License
+#
+# Copyright (c) 2023 Yonwoo Choi, Seoul National University
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import cv2
 import mediapipe as mp
 import os
 import json
 from tqdm import tqdm
+import argparse
 
 def detect_hand_joints(input_folder, output_folder, output_images_folder):
     mp_drawing = mp.solutions.drawing_utils
@@ -56,7 +79,10 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
 
 if __name__ == "__main__":
-    input_folder = "preprocessed/undistorted_right"
-    output_folder = "detect_hand/right"
-    output_images_folder = "preprocessed/right_joints"
-    detect_hand_joints(input_folder, output_folder, output_images_folder)
+    # Argument parser setup
+    parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
+    parser.add_argument('--input', help='directory of folder with hand image frames', default='data/imgs', required=False)
+    parser.add_argument('--output_json', help='output directory of json file containing 2d hand joints', default='mediapipe/detected_joints', required=False)
+    parser.add_argument('--output_img', help='base name of the frames taken by camera', default='mediapipe/joint_img', required=False)
+    args = parser.parse_args()
+    detect_hand_joints(args.input, args.output_json, args.output_img)
