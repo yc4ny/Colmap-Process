@@ -8,7 +8,7 @@ from tqdm import tqdm
 # Define command-line arguments
 parser = argparse.ArgumentParser(description="Undistort a folder of images using pre-defined camera calibration")
 parser.add_argument("--intrinsic", nargs=4, type=float, required=True, help="Camera intrinsic parameters: fx, fy, cx, cy")
-parser.add_argument("--distortion", nargs='+', type=float, required=True, help="Camera distortion coefficients: k1, [k2, [p1, [p2]]]")
+parser.add_argument("--distortion", nargs='+', type=float, required=True, help="Camera distortion coefficients: k1,k2,p1,p2")
 parser.add_argument("--input_folder", type=str, required=True, help="Path to the input folder containing images to undistort")
 parser.add_argument("--output_folder", type=str, required=True, help="Path to the output folder to save undistorted images")
 args = parser.parse_args()
