@@ -32,8 +32,8 @@ def feature_extraction(database_path, image_path, single_camera, camera_model):
             --database_path {database_path} \
             --image_path {image_path} \
             --ImageReader.single_camera {single_camera} \
-            --ImageReader.camera_model {camera_model} \
-            --ImageReader.camera_params 1910.2,1920,1080" 
+            --ImageReader.camera_model {camera_model}"
+            # --ImageReader.camera_params 1910.2,1920,1080" 
     os.system(cmd)
 
 def feature_matching(database_path):
