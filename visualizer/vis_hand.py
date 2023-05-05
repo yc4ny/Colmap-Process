@@ -7,6 +7,60 @@ import time
 import json 
 import argparse 
 
+def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None):
+    # Load the PLY file
+    colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
+    colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
+
+    vis = o3d.visualization.Visualizer()
+    vis.create_window(window_name='Scene', width=2400, height=1800)
+
+    vis.add_geometry(colmap_pcd)
+    field_of_view, front, lookat, up, zoom = load_view(f"data/views/view_{capture}.json")
+    ctr = vis.get_view_control()
+
+    # Initialize a counter for saving frames of visualized hand joints
+    counter = 0
+    # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
+    for pkl_file in pkl_files:
+        with open(pkl_file, 'rb') as f:
+            data = pickle.load(f)
+        # Prepare and visualize the scene for the current frame
+        print(pkl_file)
+
+        # Add all the necessary geometries in the frame
+        frame_geometry = prepare_frame_geometry(data, connections, extrinsics, scale)
+        for hand_geom in frame_geometry:
+            for geom in hand_geom:
+                vis.add_geometry(geom)
+        
+        # Change field of view obtained from get_view function 
+        ctr.change_field_of_view(field_of_view)
+        ctr.set_front(front)
+        ctr.set_lookat(lookat)
+        ctr.set_up(up)
+        ctr.set_zoom(zoom)
+
+        # Update Renderer
+        vis.poll_events()
+        vis.update_renderer()
+
+        # Set framerate: 1/30 = 30fps
+        time.sleep(1/30)
+
+        # Save the image for current frame
+        vis.capture_screen_image(f"visualizer/vis_img/{counter:05}.jpg")
+        
+        # Increment the counter
+        counter += 1
+
+        # Remove current geometries before adding new ones
+        for hand_geom in frame_geometry:
+            for geom in hand_geom:
+                vis.remove_geometry(geom)
+
+    vis.destroy_window()
+
 # Function to align the 3D joints to the camera center
 def align_joints_to_camera(joints, camera_location):
     # Calculate the translation vector needed to align the first joint with the camera location
@@ -77,61 +131,6 @@ def load_view(json_path):
         view_params = json.load(f)
     trajectory = view_params["trajectory"][0]
     return trajectory['field_of_view'], trajectory['front'], trajectory['lookat'], trajectory['up'], trajectory['zoom']
-
-
-def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None):
-    # Load the PLY file
-    colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
-    colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
-
-    vis = o3d.visualization.Visualizer()
-    vis.create_window(window_name='Scene', width=2400, height=1800)
-
-    vis.add_geometry(colmap_pcd)
-    field_of_view, front, lookat, up, zoom = load_view(f"data/views/view_{capture}.json")
-    ctr = vis.get_view_control()
-
-    # Initialize a counter for saving frames of visualized hand joints
-    counter = 0
-    # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
-    for pkl_file in pkl_files:
-        with open(pkl_file, 'rb') as f:
-            data = pickle.load(f)
-        # Prepare and visualize the scene for the current frame
-        print(pkl_file)
-
-        # Add all the necessary geometries in the frame
-        frame_geometry = prepare_frame_geometry(data, connections, extrinsics, scale)
-        for hand_geom in frame_geometry:
-            for geom in hand_geom:
-                vis.add_geometry(geom)
-        
-        # Change field of view obtained from get_view function 
-        ctr.change_field_of_view(field_of_view)
-        ctr.set_front(front)
-        ctr.set_lookat(lookat)
-        ctr.set_up(up)
-        ctr.set_zoom(zoom)
-
-        # Update Renderer
-        vis.poll_events()
-        vis.update_renderer()
-
-        # Set framerate: 1/30 = 30fps
-        time.sleep(1/30)
-
-        # Save the image for current frame
-        vis.capture_screen_image(f"visualizer/vis_img/{counter:05}.jpg")
-        
-        # Increment the counter
-        counter += 1
-
-        # Remove current geometries before adding new ones
-        for hand_geom in frame_geometry:
-            for geom in hand_geom:
-                vis.remove_geometry(geom)
-
-    vis.destroy_window()
 
 def main():
 
