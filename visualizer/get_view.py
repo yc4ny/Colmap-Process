@@ -2,7 +2,7 @@ import open3d as o3d
 import numpy as np 
 
 def main():
-    scene_path = 'gopro_capture/fridge/colmap_data/sparse/0/points.ply'
+    scene_path = 'data/desk/colmap_data/sparse/0/points.ply'
     scene_pcd = o3d.io.read_point_cloud(scene_path)
     # scene_pcd.paint_uniform_color([0.5, 0.5, 0.5])  
     vis = o3d.visualization.Visualizer()

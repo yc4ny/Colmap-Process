@@ -49,7 +49,7 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
         time.sleep(1/30)
 
         # Save the image for current frame
-        vis.capture_screen_image(f"visualizer/vis_img/{counter:05}.jpg")
+        vis.capture_screen_image(f"{output}/{counter:05}.jpg")
         
         # Increment the counter
         counter += 1
@@ -139,6 +139,7 @@ def main():
     parser.add_argument('--output', type=str, required=True, help='Save directory.', default = "visualizer/vis_img")
     args = parser.parse_args()
 
+    os.makedirs(args.output, exist_ok=True)
     # Hand joint connections
     # https://github.com/facebookresearch/frankmocap/blob/main/docs/joint_order.md
     connections = [
