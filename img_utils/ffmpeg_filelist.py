@@ -39,7 +39,7 @@ def create_image_list(input_folder, output_file):
 
 def main(): 
     parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
-    parser.add_argument('--input', help='directory of folder of images for ffmpeg', default='data/output', required=False)
+    parser.add_argument('--input', help='directory of folder of images for ffmpeg', default='data/input', required=False)
     parser.add_argument('--output', help='directory of output filelist txt file', default='data/filelist.txt', required=False)
     args = parser.parse_args()
     create_image_list(args.input, args.output)
