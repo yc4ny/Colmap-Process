@@ -27,9 +27,10 @@ from pathlib import Path
 from tqdm import tqdm
 from load_txt import read_cameras_txt, read_images_txt, read_points3D_txt
 
+# Conversion of quaternion to rotation matrix
 def quaternion_to_rotation_matrix(quaternion):
-    """Converts a quaternion to a rotation matrix."""
     qw, qx, qy, qz = quaternion
+    # Calculating the rotation matrix
     rot_matrix = np.array([
         [1 - 2*qy**2 - 2*qz**2, 2*qx*qy - 2*qz*qw, 2*qx*qz + 2*qy*qw],
         [2*qx*qy + 2*qz*qw, 1 - 2*qx**2 - 2*qz**2, 2*qy*qz - 2*qx*qw],
@@ -37,18 +38,24 @@ def quaternion_to_rotation_matrix(quaternion):
     ])
     return rot_matrix
 
-def undistort_points(points, k1, k2, p1, p2, fx, fy, cx, cy):
-    undistorted_points = []
+# Distorting points: Colmap output -> Parameters for distorting points to scene
+def distort_points(points, k1, k2, p1, p2, fx, fy, cx, cy):
+    distorted_points = []
     for point in points:
+        # Normalizing the points
         x, y = (point - np.array([cx, cy])) / np.array([fx, fy])
+        # Calculating the radial distortion
         r2 = x**2 + y**2
+        # Applying the distortion
         x_distorted = x * (1 + k1 * r2 + k2 * r2**2) + 2 * p1 * x * y + p2 * (r2 + 2 * x**2)
         y_distorted = y * (1 + k1 * r2 + k2 * r2**2) + p1 * (r2 + 2 * y**2) + 2 * p2 * x * y
-        undistorted_points.append([x_distorted * fx + cx, y_distorted * fy + cy])
-    return np.array(undistorted_points)
+        distorted_points.append([x_distorted * fx + cx, y_distorted * fy + cy])
+    return np.array(distorted_points)
 
+# Reprojecting 3d points of a simple pinhole camera model
 def reproject_3d_points(images_folder, images_data, points3D, camera_params, camera_id, output):
     fx, cx, cy = camera_params
+    # Constructing the camera intrinsic matrix
     intrinsics = np.array([
         [fx, 0, cx],
         [0, fx, cy],
@@ -61,15 +68,16 @@ def reproject_3d_points(images_folder, images_data, points3D, camera_params, cam
         img_path = images_folder / img_data['name']
         img = cv2.imread(str(img_path))
         img_shape = img.shape[:2]
+        # Obtainting R,t extrinsics parameters
         rot_matrix = quaternion_to_rotation_matrix(img_data['quaternion'])
         t = np.array(img_data['translation']).reshape(3, 1)
-        
+        # Projecting 3d points onto the image plane
         projected_points = intrinsics @ (rot_matrix @ np.array(points3D)[:, 1:].T + t)
         projected_points = (projected_points[:2] / projected_points[2]).T.astype(int)
-        
+        # Checking if points are on the image plane
         valid_points = (projected_points[:, 0] >= 0) & (projected_points[:, 0] < img_shape[1]) & \
                        (projected_points[:, 1] >= 0) & (projected_points[:, 1] < img_shape[0])
-
+        # Draw reprojected points on the image plane
         for point in projected_points[valid_points]:
             cv2.circle(img, tuple(point), 4, (0, 0, 255), -1)
         
