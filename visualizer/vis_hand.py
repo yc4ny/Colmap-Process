@@ -6,14 +6,15 @@ import glob
 import time
 import json 
 import argparse 
+import cv2 
 
-def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None):
+def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None, width = None, height = None ):
     # Load the PLY file
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
 
     vis = o3d.visualization.Visualizer()
-    vis.create_window(window_name='Scene', width=2400, height=1800)
+    vis.create_window(window_name='Scene', width=width, height=height)
 
     vis.add_geometry(colmap_pcd)
     field_of_view, front, lookat, up, zoom = load_view(f"data/views/view_{capture}.json")
@@ -145,6 +146,8 @@ def main():
     connections = [
         [0, 1],[1, 2],[2, 3],[3, 4],[0, 5],[5, 6],[6, 7],[7, 8],[0, 9],[9, 10],[10, 11],[11, 12],
         [0, 13],[13, 14],[14, 15],[15, 16],[0, 17],[17, 18],[18, 19],[19, 20]]
+
+    img = cv2.imread(f"data/{args.capture}/img/undistort_opencv_head")
 
     # Load scene pointcloud
     ply_file_path = f'data/{args.capture}/colmap_data/sparse/0/points.ply'
