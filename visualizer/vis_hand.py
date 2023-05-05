@@ -5,6 +5,7 @@ import os
 import glob 
 import time
 import json 
+import argparse 
 
 def align_joints_to_camera(joints, camera_location):
     # Calculate the translation vector needed to align the first joint with the camera location
@@ -76,7 +77,7 @@ def load_view(json_path):
     return trajectory['field_of_view'], trajectory['front'], trajectory['lookat'], trajectory['up'], trajectory['zoom']
 
 
-def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None):
+def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None):
     # Load the PLY file
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
@@ -85,7 +86,7 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
     vis.create_window(window_name='Scene', width=2400, height=1800)
 
     vis.add_geometry(colmap_pcd)
-    field_of_view, front, lookat, up, zoom = load_view("gopro_capture/desk/views/view.json")
+    field_of_view, front, lookat, up, zoom = load_view(f"data/views/view_{capture}.json")
     ctr = vis.get_view_control()
 
     # Iterate through all the .pkl files, load the joint data, and visualize the hand movements sequentially
@@ -115,28 +116,29 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
     vis.destroy_window()
 
 def main():
+    parser = argparse.ArgumentParser(description='Visualize 3D points from capture.')
+    parser.add_argument('--capture', type=str, required=True, help='Name of the capture to visualize.', default = "desk")
+    args = parser.parse_args()
+
     connections = [
         [0, 1],[1, 2],[2, 3],[3, 4],[0, 5],[5, 6],[6, 7],[7, 8],[0, 9],[9, 10],[10, 11],[11, 12],
         [0, 13],[13, 14],[14, 15],[15, 16],[0, 17],[17, 18],[18, 19],[19, 20]]
 
-    ply_file_path = 'gopro_capture/desk/colmap_data/sparse/0/points.ply'
-    # Get all the .pkl files in the joints_3d/head/ folder
-    pkl_files = sorted(glob.glob('gopro_capture/desk/frankmocap_joints/*.pkl'))
+    ply_file_path = f'data/{args.capture}/colmap_data/sparse/0/points.ply'
+    pkl_files = sorted(glob.glob(f'data/{args.capture}/frankmocap_joints/*.pkl'))
 
-    # Load extrinsics using the corresponding key for head, left, and right
-    with open('gopro_capture/desk/camera_extrinsic/head_extrinsic.pkl', 'rb') as f:
+    with open(f'data/{args.capture}/camera_extrinsic/head_extrinsic.pkl', 'rb') as f:
         head_extrinsics = pickle.load(f)
 
-    with open('gopro_capture/desk/camera_extrinsic/left_extrinsic.pkl', 'rb') as f:
+    with open(f'data/{args.capture}/camera_extrinsic/left_extrinsic.pkl', 'rb') as f:
         left_extrinsics = pickle.load(f)
 
-    with open('gopro_capture/desk/camera_extrinsic/right_extrinsic.pkl', 'rb') as f:
+    with open(f'data/{args.capture}/camera_extrinsic/right_extrinsic.pkl', 'rb') as f:
         right_extrinsics = pickle.load(f)
 
     extrinsics = {'head': head_extrinsics, 'left': left_extrinsics, 'right': right_extrinsics}
 
-    # Call visualize_3d_points() with the list of pkl_files and extrinsics dictionary
-    visualize_3d_points(pkl_files, connections, ply_file_path, scale=5, extrinsics=extrinsics)
+    visualize_3d_points(pkl_files, connections, ply_file_path, scale=5, extrinsics=extrinsics, capture = args.capture)
 
 if __name__ == "__main__":
     main()
