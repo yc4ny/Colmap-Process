@@ -1,1 +1,1 @@
-# Automating Colmap
+
