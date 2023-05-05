@@ -14,7 +14,7 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
 
     vis = o3d.visualization.Visualizer()
-    vis.create_window(window_name='Scene', width=width, height=height)
+    vis.create_window(window_name='Scene', width=2400, height=1800)
 
     vis.add_geometry(colmap_pcd)
     field_of_view, front, lookat, up, zoom = load_view(f"data/views/view_{capture}.json")
