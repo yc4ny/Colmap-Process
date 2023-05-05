@@ -1,42 +1,34 @@
+# MIT License
+#
+# Copyright (c) 2023 Yonwoo Choi, Seoul National University
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import argparse
 import cv2
 import numpy as np
-import os
+from pathlib import Path
 from tqdm import tqdm
-
-def read_cameras_txt(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    camera_info = lines[-1].strip().split()
-    return [float(val) for val in camera_info[4:12]]
-
-def read_images_txt(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    image_data = []
-    for i in range(4, len(lines), 2):
-        image_info = lines[i].strip().split()
-        img_id, qw, qx, qy, qz, tx, ty, tz, cam_id, name = image_info
-        image_data.append({
-            'id': int(img_id),
-            'quaternion': [float(qw), float(qx), float(qy), float(qz)],
-            'translation': [float(tx), float(ty), float(tz)],
-            'camera_id': int(cam_id),
-            'name': name
-        })
-    return image_data
-
-def read_points3D_txt(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-    points3D = []
-    for line in lines[3:]:
-        data = line.strip().split()
-        point_id, x, y, z = map(float, data[:4])
-        points3D.append([point_id, x, y, z])
-    return points3D
+from load_txt import read_cameras_txt, read_images_txt, read_points3D_txt
 
 def quaternion_to_rotation_matrix(quaternion):
+    """Converts a quaternion to a rotation matrix."""
     qw, qx, qy, qz = quaternion
     rot_matrix = np.array([
         [1 - 2*qy**2 - 2*qz**2, 2*qx*qy - 2*qz*qw, 2*qx*qz + 2*qy*qw],
@@ -56,38 +48,39 @@ def undistort_points(points, k1, k2, p1, p2, fx, fy, cx, cy):
     return np.array(undistorted_points)
 
 def reproject_3d_points(images_folder, images_data, points3D, camera_params, camera_id, output):
-    fx, fy, cx, cy, k1, k2, p1, p2 = camera_params
+    fx, cx, cy = camera_params
     intrinsics = np.array([
         [fx, 0, cx],
-        [0, fy, cy],
+        [0, fx, cy],
         [0, 0, 1]
     ])
 
     for img_data in tqdm(images_data, desc="Processing frames"):
         if img_data['camera_id'] != camera_id:
             continue
-        img = cv2.imread(os.path.join(images_folder, img_data['name']))
+        img_path = images_folder / img_data['name']
+        img = cv2.imread(str(img_path))
+        img_shape = img.shape[:2]
         rot_matrix = quaternion_to_rotation_matrix(img_data['quaternion'])
         t = np.array(img_data['translation']).reshape(3, 1)
-        projected_points = []
-        for point in points3D:
-            _, x, y, z = point
-            proj_point = intrinsics @ (rot_matrix @ np.array([x, y, z]).reshape(3, 1) + t)
-            proj_point = proj_point[:2] / proj_point[2]
-            projected_points.append(proj_point.ravel())
         
-        for point in projected_points:
-            x_proj, y_proj = int(point[0]), int(point[1])
+        projected_points = intrinsics @ (rot_matrix @ np.array(points3D)[:, 1:].T + t)
+        projected_points = (projected_points[:2] / projected_points[2]).T.astype(int)
+        
+        valid_points = (projected_points[:, 0] >= 0) & (projected_points[:, 0] < img_shape[1]) & \
+                       (projected_points[:, 1] >= 0) & (projected_points[:, 1] < img_shape[0])
 
-            if 0 <= x_proj < img.shape[1] and 0 <= y_proj < img.shape[0]:
-                cv2.circle(img, (x_proj, y_proj), 4, (0, 0, 255), -1)
-
-        cv2.imwrite(os.path.join( "preprocessed/reproject_opencv_right", f"{img_data['name']}"), img)
+        for point in projected_points[valid_points]:
+            cv2.circle(img, tuple(point), 4, (0, 0, 255), -1)
+        
+        cv2.imwrite(str(output / img_data['name']), img)
 
 def main(images_folder, cameras_txt, images_txt, points3D_txt, camera_id, output):
-    camera_params = read_cameras_txt(cameras_txt)
-    camera_params = 2342.58 , 2342.58, 1920, 1080,0, 0, 0, 0
+    # Make output folder if not exists
+    output.mkdir(parents=True, exist_ok=True)
 
+    # Read camera parameters
+    camera_params = read_cameras_txt(cameras_txt, camera_id)
     images_data = read_images_txt(images_txt)
     points3D = read_points3D_txt(points3D_txt)
 
@@ -95,14 +88,14 @@ def main(images_folder, cameras_txt, images_txt, points3D_txt, camera_id, output
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--images", type=str, default= "preprocessed/scene", help = "Folder directory of the input images")
-    parser.add_argument("--colmap_output", type=str, default= "colmap_data/sparse/0", help= "Folder directory of the colmap output, where the .bin files are stored")
+    parser.add_argument("--images", type=Path, default= Path("preprocessed/scene"), help = "Folder directory of the input images")
+    parser.add_argument("--colmap_output", type=Path, default= Path("colmap_data/sparse/0"), help= "Folder directory of the colmap output, where the .bin files are stored")
     parser.add_argument("--camera_id", type = int, default = 1, help = "The ID of camera which can be found in the cameras.txt file")
-    parser.add_argument("--output", type=str, default= "reprojection/", help = "Output path directory")
+    parser.add_argument("--output", type=Path, default= Path("reprojection/"), help = "Output path directory")
     args = parser.parse_args()
 
-    cameras = f"{args.colmap_output}/cameras.txt"
-    images = f"{args.colmap_output}/images.txt"  
-    points3D = f"{args.colmap_output}/points3D.txt" 
+    cameras = args.colmap_output / "cameras.txt"
+    images = args.colmap_output / "images.txt"  
+    points3D = args.colmap_output / "points3D.txt" 
 
     main(args.images, cameras, images, points3D, args.camera_id, args.output)
