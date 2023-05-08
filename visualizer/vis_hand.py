@@ -30,7 +30,7 @@ import json
 import argparse 
 import cv2 
 
-def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None, width = None, height = None ):
+def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrinsics=None, capture = None, output = None, width = None, height = None, fps = 30 ):
     # Load the PLY file``
     colmap_pcd = o3d.io.read_point_cloud(ply_file_path)
     colmap_pcd.paint_uniform_color([0.5, 0.5, 0.5])  # Grey color for the points from the PLY file
@@ -69,7 +69,7 @@ def visualize_3d_points(pkl_files, connections, ply_file_path, scale=10, extrins
         vis.update_renderer()
 
         # Set framerate: 1/30 = 30fps
-        time.sleep(1/30)
+        time.sleep(1/fps)
 
         # Save the image for current frame
         vis.capture_screen_image(f"{output}/{counter:05}.jpg")
@@ -160,6 +160,7 @@ def main():
     parser = argparse.ArgumentParser(description='Visualize 3D Hand in 3D Space.')
     parser.add_argument('--capture', type=str, required=True, help='Name of the captured data.', default = "desk")
     parser.add_argument('--output', type=str, required=True, help='Save directory.', default = "visualizer/vis_img")
+    parser.add_argument('--fps', type=int, required=False, help='Fps of visualizer' ,default = 30)
     args = parser.parse_args()
 
     os.makedirs(args.output, exist_ok=True)
@@ -186,7 +187,7 @@ def main():
     extrinsics = {'head': head_extrinsics, 'left': left_extrinsics, 'right': right_extrinsics}
 
     # Run the Open3D visualizer for visualizing 3D hand in the reconstructed 3D scene from colmap
-    visualize_3d_points(pkl_files, connections, ply_file_path, scale=5, extrinsics=extrinsics, capture = args.capture, output = args.output)
+    visualize_3d_points(pkl_files, connections, ply_file_path, scale=5, extrinsics=extrinsics, capture = args.capture, output = args.output, fps = args.fps)
 
 if __name__ == "__main__":
     main()
