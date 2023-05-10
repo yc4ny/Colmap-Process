@@ -9,3 +9,5 @@ check_existance.py
 SuperGluePretrainedNetwork/*
 *pkl
 gopro_capture
+*.jpg
+*.pkl

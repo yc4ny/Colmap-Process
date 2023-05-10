@@ -113,7 +113,7 @@ def create_hand_geometry(joints, connections, color=[1, 0, 0]):
     return hand_pcd, hand_lines
 
 # Function to extract camera extrinsics, 3D joints from input files and align, create geometries of the final geometries which needs to be rendered
-def prepare_frame_geometry(data, connections, extrinsics, scale=5):
+def prepare_frame_geometry(data, connections, extrinsics, scale):
     frame_geometry = []
     base_name = os.path.splitext(os.path.basename(data['image_path']))[0]
     base_name = base_name.replace('_prediction_result', '')
@@ -132,7 +132,7 @@ def prepare_frame_geometry(data, connections, extrinsics, scale=5):
         left_extrinsic_matrix = extrinsics['left'][left_key]
 
         left_joints = align_joints_to_camera(left_joints * scale, -left_extrinsic_matrix[:, :3].T @ left_extrinsic_matrix[:, 3])
-
+        print(left_joints)
         left = create_hand_geometry(left_joints, connections, color=[1, 0, 0])
         frame_geometry.append(left)
 
