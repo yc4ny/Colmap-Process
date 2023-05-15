@@ -26,7 +26,7 @@ import argparse
 import json 
 
 parser = argparse.ArgumentParser(description='Visualize 3D Hand in 3D Space.')
-parser.add_argument('--capture', type=str, required=True, help='Name of the captured data.', default = "desk")
+parser.add_argument('--capture', type=str, required=False, help='Name of the captured data.', default = "ladder")
 args = parser.parse_args()
 
 def load_view(json_path): 

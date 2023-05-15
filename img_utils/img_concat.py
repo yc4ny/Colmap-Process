@@ -36,10 +36,10 @@ args = parser.parse_args()
 def concatenate_images(folders, direction, output_folder):
     # Get the sorted image files from all folders
     images_folders = [sorted([f for f in os.listdir(folder) if f.endswith(('.jpg', '.jpeg', '.png'))]) for folder in folders]
-
-    # Ensure that all folders have the same number of images
-    if len(set(map(len, images_folders))) != 1:
-        raise ValueError("The number of images in all folders must be the same")
+    # print(images_folders)
+    # # Ensure that all folders have the same number of images
+    # if len(set(map(len, images_folders))) != 1:
+    #     raise ValueError("The number of images in all folders must be the same")
 
     # Create output folder if it doesn't exist
     if not os.path.exists(output_folder):
