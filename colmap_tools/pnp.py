@@ -39,10 +39,10 @@ def save_output_as_txt(input_path, output_path, output_type):
 def main():
     # Argument parser setup
     parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
-    parser.add_argument('--images', help='images.txt output file from colmap', default='data/hand', required=False)
+    parser.add_argument('--images', help='Image path', default='preprocessed/undistort_right', required=False)
     parser.add_argument('--database', help='colmap database path', default='colmap_data/database.db', required=False)
-    parser.add_argument('--existing_reconstruction', help='save path of output pkl file', default='colmap_data/sparse/0', required=False)
-    parser.add_argument('--output_path', help='output path of pnp result', default='colmap_data/hand', required=False)
+    parser.add_argument('--existing_reconstruction', help='existing bin file path', default='colmap_data/left', required=False)
+    parser.add_argument('--output_path', help='output path of pnp result', default='colmap_data/right', required=False)
     args = parser.parse_args()
 
     # Set the paths
@@ -52,7 +52,7 @@ def main():
     output_path = args.output_path
     
     # Feature extraction
-    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model SIMPLE_PINHOLE"
+    feature_extractor_cmd = f"colmap feature_extractor --image_path {image_path} --database_path {database_path} --ImageReader.single_camera_per_folder 1  --ImageReader.camera_model SIMPLE_PINHOLE --ImageReader.camera_params 1920.84,1920,1080"
     # Use if need to put camera intrinsic prior:  --ImageReader.camera_params 1929.11,1920,1080 
     run_command(feature_extractor_cmd)
     

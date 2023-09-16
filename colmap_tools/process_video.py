@@ -30,15 +30,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Argument parser setup
 parser = argparse.ArgumentParser(description='Preprocessing mp4 files')
-parser.add_argument('--scene', help='static scene video file', default='videos/desk1/scene.MP4', required=False)
-parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/desk1/head.MP4', required=False)
-parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/desk1/left.MP4', required=False)
-parser.add_argument('--camera_3', help='video file of moving camera in scene', default='videos/desk1/right.MP4', required=False)
+parser.add_argument('--scene', help='static scene video file', default='videos/ladder/scene.MP4', required=False)
+parser.add_argument('--camera_1', help='video file of moving camera in scene', default='videos/ladder/head.MP4', required=False)
+parser.add_argument('--camera_2', help='video file of moving camera in scene', default='videos/ladder/left.MP4', required=False)
+parser.add_argument('--camera_3', help='video file of moving camera in scene', default='videos/ladder/right.MP4', required=False)
 parser.add_argument('--output', help='output dir of processed frames', default='preprocessed', required=False)
 args = parser.parse_args()
 
 # JPEG quality setting
-JPEG_QUALITY = 100
+JPEG_QUALITY = 20
 
 def extract_frames(video, output, path, is_scene=False):
     # Get the base file name and remove the file extension
@@ -102,10 +102,10 @@ def main():
 
     # Create a list of tasks for each video file
     tasks = [
-        (scene_vid, args.output, args.scene, True),
-        (camera1_vid, args.output, args.camera_1, False),
+        # # (scene_vid, args.output, args.scene, True)
+        # (camera1_vid, args.output, args.camera_1, False),
         (camera2_vid, args.output, args.camera_2, False),
-        (camera3_vid, args.output, args.camera_3, False)
+        # (camera3_vid, args.output, args.camera_3, False)
     ]
 
     # Use ThreadPoolExecutor for parallel execution

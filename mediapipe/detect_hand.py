@@ -56,10 +56,11 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
                 for hand_landmarks in results.multi_hand_landmarks:
                     handedness = results.multi_handedness[results.multi_hand_landmarks.index(hand_landmarks)].classification[0].label
 
-                    if handedness == "Right":
-                        hand_type = "left"
-                    else:
-                        hand_type = "right"
+                    # Skip if handedness is not Left
+                    if handedness == "Left":
+                        continue
+
+                    hand_type = "right"
 
                     joint_coordinates = []
                     for idx, landmark in enumerate(hand_landmarks.landmark):
@@ -70,6 +71,9 @@ def detect_hand_joints(input_folder, output_folder, output_images_folder):
 
                     # Draw hand landmarks on the image
                     mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+
+                    # Break the loop after processing the first left hand
+                    break
 
             with open(output_path, "w") as outfile:
                 json.dump(hand_joints, outfile)
