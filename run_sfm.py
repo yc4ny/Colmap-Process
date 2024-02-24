@@ -33,7 +33,8 @@ def feature_extraction(database_path, image_path, single_camera, camera_model):
             --image_path {image_path} \
             --ImageReader.single_camera {single_camera} \
             --ImageReader.camera_model {camera_model}"
-            # --ImageReader.camera_params 1910.2,1920,1080" 
+            # If intital comaera parameters are available: 
+            # --ImageReader.camera_params 
     os.system(cmd)
 
 def feature_matching(database_path):
@@ -105,9 +106,9 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run COLMAP with initial or undistorted images.")
-    parser.add_argument("--image_path", action="store_true", help="Image paths", default ="preprocessed/undistort_scene" )
+    parser.add_argument("--image_path", action="store_true", help="Path to folder containing images")
     parser.add_argument("--colmap_data",action="store_true", help="Path to colmap data", default = "colmap_data")
-    parser.add_argument("--camera_model",action="store_true", help="Type of camera model", default = "SIMPLE_PINHOLE")
+    parser.add_argument("--camera_model",action="store_true", help="Type of camera model", default = "OPENCV")
     args = parser.parse_args()
 
     main(args)
