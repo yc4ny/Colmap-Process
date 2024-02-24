@@ -96,10 +96,10 @@ def main(images_folder, cameras_txt, images_txt, points3D_txt, camera_id, output
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--images", type=Path, default= Path("preprocessed/undistort_right"), help = "Folder directory of the input images")
-    parser.add_argument("--colmap_output", type=Path, default= Path("colmap_data/right"), help= "Folder directory of the colmap output, where the .bin files are stored")
-    parser.add_argument("--camera_id", type = int, default = 4, help = "The ID of camera which can be found in the cameras.txt file")
-    parser.add_argument("--output", type=Path, default= Path("reprojection_right/"), help = "Output path directory")
+    parser.add_argument("--images", type=Path, help = "Folder directory of the input images")
+    parser.add_argument("--colmap_output", type=Path, help= "Folder directory of the colmap output, where the .bin files are stored")
+    parser.add_argument("--camera_id", type = int, default = 1, help = "The ID of camera which can be found in the cameras.txt file")
+    parser.add_argument("--output", type=Path, help = "Output path directory")
     args = parser.parse_args()
 
     cameras = args.colmap_output / "cameras.txt"
