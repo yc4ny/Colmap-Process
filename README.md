@@ -32,6 +32,7 @@ To install the required Python packages, run the following command in your termi
 
 ```bash
 pip install -r requirements.txt
+```
 
 Make sure you have COLMAP installed on your system. For installation instructions, refer to the [official COLMAP documentation](https://colmap.github.io/install.html).
 
