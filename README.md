@@ -1,5 +1,5 @@
 # Colmap Tools
-
+![teaser.png](assets/colmap.png)
 This repository contains a collection of Python scripts designed to automate various tasks using COLMAP, an open-source Structure-from-Motion (SfM) and Multi-View Stereo (MVS) software. These tools facilitate processes ranging from 3D reconstruction to camera pose estimation and 3D point reprojection onto 2D images.
 
 ### Overview of Scripts
