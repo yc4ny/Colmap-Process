@@ -2,7 +2,7 @@
 
 This repository contains a collection of Python scripts designed to automate various tasks using COLMAP, an open-source Structure-from-Motion (SfM) and Multi-View Stereo (MVS) software. These tools facilitate processes ranging from 3D reconstruction to camera pose estimation and 3D point reprojection onto 2D images.
 
-## Overview of Scripts
+### Overview of Scripts
 
 #### run_sfm.py
 
@@ -24,7 +24,7 @@ Extracts camera extrinsic parameters from a COLMAP `images.txt` file for further
 
 Demonstrates how to reproject 3D points back onto 2D image planes using camera intrinsic and extrinsic parameters, including handling of quaternion to rotation matrix conversion and point distortion.
 
-## Installation
+### Installation
 
 I have tested this code on Python 1.7.1.
 
@@ -36,7 +36,7 @@ pip install -r requirements.txt
 
 Make sure you have COLMAP installed on your system. For installation instructions, refer to the [official COLMAP documentation](https://colmap.github.io/install.html).
 
-## Usage
+### Usage
 
 Each script is designed to be run from the command line with specific arguments. Below are examples for each script:
 
@@ -65,10 +65,10 @@ python reproject.py --images <path_to_images> --colmap_output <path_to_colmap_ou
 ```
 
 
-## Contributing
+### Contributing
 
 Contributions are welcome! If you have suggestions for improvements or bug fixes, please feel free to submit a pull request or open an issue.
 
-## License
+### License
 
 This project is open source and available under the [MIT License](LICENSE).
