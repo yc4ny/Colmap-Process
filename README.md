@@ -4,23 +4,23 @@ This repository contains a collection of Python scripts designed to automate var
 
 ## Overview of Scripts
 
-### 1. `run_sfm.py`
+### 1. run_sfm.py
 
 Automates the full pipeline for 3D reconstruction using COLMAP, including database creation, feature extraction, feature matching, sparse reconstruction, and exporting the output.
 
-### 2. `pnp.py`
+### 2. pnp.py
 
 Performs Perspective-n-Point (PnP) problem solving to estimate camera poses with an existing 3D model.
 
-### 3. `load_txt.py`
+### 3. load_txt.py
 
 Provides utility functions for loading camera parameters, image data, and 3D point data from COLMAP's text output files.
 
-### 4. `extract_extrinsics.py`
+### 4. extract_extrinsics.py
 
 Extracts camera extrinsic parameters from a COLMAP `images.txt` file for further analysis or processing.
 
-### 5. `reproject.py`
+### 5. reproject.py
 
 Demonstrates how to reproject 3D points back onto 2D image planes using camera intrinsic and extrinsic parameters, including handling of quaternion to rotation matrix conversion and point distortion.
 
@@ -40,25 +40,25 @@ Make sure you have COLMAP installed on your system. For installation instruction
 
 Each script is designed to be run from the command line with specific arguments. Below are examples for each script:
 
-### `run_sfm.py`
+### run_sfm.py
 
 ```bash
 python run_sfm.py --image_path <path_to_images> --colmap_data <path_to_colmap_data> --camera_model <camera_model>
 ```
 
-### `pnp.py`
+### pnp.py
 
 ```bash
 python pnp.py --images <path_to_images> --database <path_to_colmap_database> --existing_reconstruction <path_to_existing_model> --output_path <output_path>
 ```
 
-### `extract_extrinsics.py`
+### extract_extrinsics.py
 
 ```bash
 python extract_extrinsics.py --images_txt <path_to_images_txt> --output <output_pickle_file> --base <base_name>
 ```
 
-### `reproject.py`
+### reproject.py
 
 ```bash
 python reproject.py --images <path_to_images> --colmap_output <path_to_colmap_output> --camera_id <camera_id> --output <output_path>
