@@ -31,6 +31,7 @@ I have tested this code on Python 1.7.1.
 To install the required Python packages, run the following command in your terminal:
 
 ```bash
+conda install colmap
 pip install -r requirements.txt
 ```
 
